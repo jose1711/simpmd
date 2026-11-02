@@ -8,16 +8,17 @@ PMD_BUILD ?= DEBUG
 PMD_SHARE ?=
 
 CC = g++
-CC_OPTS = -D PMD_SHARE=\"$(PMD_SHARE)\"
+CC_OPTS = -std=c++11 -D PMD_SHARE=\"$(PMD_SHARE)\"
 LD = g++
-LD_OPTS = -lSDL -lpopt -lrt
+LD_OPTS =
+LD_LIBS = -lSDL2 -lSDL2_ttf -lpthread -lrt
 
 ifeq ($(PMD_BUILD), DEBUG)
 CC_OPTS += -O0 -g
 else ifeq ($(PMD_BUILD), RELEASE)
 CC_OPTS += -O2
 else
-$(error)
+$(error Unknown build type.)
 endif
 
 BIN = ../bin
@@ -32,7 +33,7 @@ clean:
 
 # Modules
 
-MM = sim_core sim_timing sim_display sim_keyboard sim_processor sim_speaker sim_tape
+MM = sim_core sim_display sim_gamepad sim_keyboard sim_processor sim_speaker sim_state sim_tape sim_timing sim_web
 OO = $(addsuffix .o, $(MM))
 DD = $(addsuffix .dep, $(MM))
 
@@ -42,11 +43,11 @@ DD = $(addsuffix .dep, $(MM))
 # Executable
 
 $(BIN)/simpmd: $(OO)
-	$(LD) $(LD_OPTS) -o $@ $^
+	$(LD) $(LD_OPTS) -o $@ $^ $(LD_LIBS)
 
 # Dependencies
 
-include $(DD)
+-include $(DD)
 
 %.dep: %.c
 	$(CC) -MM $(CC_OPTS) -MT "$@ $(basename $@).o" -o $@ $<

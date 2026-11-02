@@ -18,15 +18,10 @@ limitations under the License.
 
 */
 
-#include <stdint.h>
+#include "sim_common.h"
 
 #include <map>
 #include <utility>
-#include <iostream>
-
-#include <SDL/SDL.h>
-
-#include "sim_common.h"
 
 
 //--------------------------------------------------------------------------
@@ -60,7 +55,7 @@ struct tKeyLocation
 };
 
 /// Map for translation of keyboard events.
-typedef std::map <SDLKey, tKeyLocation> tKeyMap;
+typedef std::map <SDL_Keycode, tKeyLocation> tKeyMap;
 static tKeyMap oKeyMap;
 
 
@@ -77,9 +72,30 @@ static volatile byte iKeyColumn;
 
 /** Read from keyboard row register.
  */
+/// Reads of the keyboard row by the simulated processor, and those that returned a pressed key (for typing PMD_KEYS).
+static volatile uint32 iScanCount;
+static volatile uint32 iSeenCount;
+
 byte KBDReadRow ()
 {
-  return (iKeyShifts & abKeyMatrix [iKeyColumn]);
+  byte iRow = iKeyShifts & abKeyMatrix [iKeyColumn];
+  iScanCount ++;
+  // The bits 0-4 are the keys of the column, 5 and 6 [Shift] and [Stop]; all set is nothing pressed.
+  if ((iRow & 0x7F) != 0x7F)
+    iSeenCount ++;
+  return (iRow);
+}
+
+/// Number of keyboard row reads so far, it grows only while the program scans the keyboard (waits for a key).
+uint32 KBDScanCount ()
+{
+  return (iScanCount);
+}
+
+/// Number of keyboard row reads that saw a pressed key.
+uint32 KBDSeenCount ()
+{
+  return (iSeenCount);
 }
 
 
@@ -111,13 +127,13 @@ void KBDWriteColumn (byte iData)
  *
  *  @arg pEvent The event to handle.
  */
-void KBDEventHandler (const SDL_KeyboardEvent *pEvent)
+static void KBDApply (SDL_Keycode iSym, Uint8 iState)
 {
   // Find the location of the key in the key map
-  tKeyMap::iterator xLocation = oKeyMap.find (pEvent->keysym.sym);
+  tKeyMap::iterator xLocation = oKeyMap.find (iSym);
   if (xLocation != oKeyMap.end ())
   {
-    switch (pEvent->state)
+    switch (iState)
     {
       case SDL_PRESSED:
         // Pressing a key resets the relevant bit of the keyboard matrix
@@ -130,11 +146,11 @@ void KBDEventHandler (const SDL_KeyboardEvent *pEvent)
     }
   }
   // Shift keys have special handling
-  else switch (pEvent->keysym.sym)
+  else switch (iSym)
   {
     case SDLK_LSHIFT:
     case SDLK_RSHIFT:
-      switch (pEvent->state)
+      switch (iState)
       {
         case SDL_PRESSED:  iKeyShifts &= ~PMD_KBD_SHIFT_MASK; break;
         case SDL_RELEASED: iKeyShifts |=  PMD_KBD_SHIFT_MASK; break;
@@ -142,12 +158,77 @@ void KBDEventHandler (const SDL_KeyboardEvent *pEvent)
       break;
     case SDLK_LCTRL:
     case SDLK_RCTRL:
-      switch (pEvent->state)
+      switch (iState)
       {
         case SDL_PRESSED:  iKeyShifts &= ~PMD_KBD_STOP_MASK; break;
         case SDL_RELEASED: iKeyShifts |=  PMD_KBD_STOP_MASK; break;
       }
       break;
+  }
+}
+
+
+
+/** Minimal time a key stays pressed [ms].
+ *
+ *  The event loop can fall behind on a slow machine and deliver press and release
+ *  of a key at once, the emulated keyboard scan would then never see the key.
+ */
+#define PMD_KBD_HOLD_MS         60
+
+/// Minimal hold time of the running game [ms], PMD_KBD_HOLD_MS by default (see KBDSetHold).
+static int iHoldMs = PMD_KBD_HOLD_MS;
+
+/** Sets the minimal time a key stays pressed.
+ *
+ *  A game in BASIC reads the key (INKEY) once in a pass of its loop, in BOMBARDE it is about 150 ms,
+ *  a shorter tap of a gamepad button is missed in a part of the passes.
+ */
+void KBDSetHold (int iMs)
+{
+  iHoldMs = iMs;
+}
+
+/// Time of the last press of a key.
+static std::map <SDL_Keycode, Uint32> oPressTime;
+/// Releases waiting for the minimal hold time, key and time of the release.
+static std::map <SDL_Keycode, Uint32> oPendingRelease;
+
+
+void KBDEventHandler (const SDL_KeyboardEvent *pEvent)
+{
+  SDL_Keycode iSym = pEvent->keysym.sym;
+  Uint32 iNow = SDL_GetTicks ();
+  switch (pEvent->state)
+  {
+    case SDL_PRESSED:
+      oPressTime [iSym] = iNow;
+      oPendingRelease.erase (iSym);
+      KBDApply (iSym, SDL_PRESSED);
+      break;
+    case SDL_RELEASED:
+      if (oPressTime.count (iSym) && iNow - oPressTime [iSym] < (Uint32) iHoldMs)
+        oPendingRelease [iSym] = oPressTime [iSym] + iHoldMs;
+      else
+        KBDApply (iSym, SDL_RELEASED);
+      break;
+  }
+}
+
+
+/** Releases the keys held for the minimal time, called periodically. */
+void KBDPoll ()
+{
+  Uint32 iNow = SDL_GetTicks ();
+  for (std::map <SDL_Keycode, Uint32>::iterator xKey = oPendingRelease.begin (); xKey != oPendingRelease.end ();)
+  {
+    if ((Sint32) (iNow - xKey->second) >= 0)
+    {
+      KBDApply (xKey->first, SDL_RELEASED);
+      oPendingRelease.erase (xKey++);
+    }
+    else
+      ++xKey;
   }
 }
 
@@ -161,10 +242,12 @@ void KBDInitialize ()
 
   struct tKeyEvent
   {
-    SDLKey iKey;
-    int    iRow;
-    int    iColumn;
+    SDL_Keycode iKey;
+    int         iRow;
+    int         iColumn;
   };
+
+  // TODO Separate keypad codes ?
 
   const tKeyEvent asKeyEvents [] = {
     // Row 1
@@ -214,7 +297,7 @@ void KBDInitialize ()
     { SDLK_RIGHTBRACKET,        3, 12 },                // BACKSLASH
     { SDLK_BACKSPACE,           3, 13 },                // LEFT
     { SDLK_LEFT,                3, 13 },                // LEFT
-    { SDLK_KP5,                 3, 14 },                // HOME
+    { SDLK_KP_5,                3, 14 },                // HOME
     { SDLK_RIGHT,               3, 15 },                // RIGHT
     // Row 4
     { SDLK_a,                   4, 1 },                 // A
@@ -273,4 +356,3 @@ void KBDShutdown ()
 
 
 //--------------------------------------------------------------------------
-

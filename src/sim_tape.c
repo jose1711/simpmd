@@ -18,53 +18,40 @@ limitations under the License.
 
 */
 
-#include <popt.h>
-#include <fcntl.h>
-#include <stdint.h>
-#include <unistd.h>
-#include <sys/types.h>
+/* MODIFIED
 
-#include <SDL/SDL.h>
+ -Modified:
+
+ bool TAPNextInputFile (std::vector <std::string> oArgTapeInputs)
+ bool TAPNextOutputFile (std::vector <std::string> oArgTapeOutputs)
+ bool TAPInputFileStatus ()
+ bool TAPOutputFileStatus ()
+
+*/
 
 #include "sim_common.h"
+
+#include <string>
+#include <vector>
+#include <fstream>
+#include <sys/stat.h>
 
 
 //--------------------------------------------------------------------------
 // Command Line Options
 
-/// Tape input. What file to open as tape input.
-static char *pArgTapeInput = NULL;
-/// Tape output. What file to open as tape output.
-static char *pArgTapeOutput = NULL;
+/// Tape input names. What files to open as tape inputs.
+static std::vector <std::string> oArgTapeInputs;
+/// Tape output names. What files to open as tape outputs.
+static std::vector <std::string> oArgTapeOutputs;
 
 /// Time tape input. Whether to simulate timing of the tape input.
-static int iArgTimeTapeInput = false;
+static bool bArgTimeTapeInput = false;
 /// Time tape output. Whether to simulate timing of the tape output.
-static int iArgTimeTapeOutput = false;
+static bool bArgTimeTapeOutput = false;
 
 /// Tape rate. What tape rate to assume when simulating timing.
 static int iArgTapeRate = 2400;
-
-/// Module command line options table.
-struct poptOption asTAPOptions [] =
-{
-  { "tape-in", 'i', POPT_ARG_STRING,
-      &pArgTapeInput, 0,
-      "File to open as tape input", "file" },
-  { "tape-out", 'o', POPT_ARG_STRING,
-      &pArgTapeOutput, 0,
-      "File to open as tape output", "file" },
-  { "time-tape-input", 0, POPT_ARG_VAL,
-      &iArgTimeTapeInput, true,
-      "Simulate tape input timing", NULL },
-  { "time-tape-output", 0, POPT_ARG_VAL,
-      &iArgTimeTapeOutput, true,
-      "Simulate tape output timing", NULL },
-  { "tape-rate", 0, POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT,
-      &iArgTapeRate, 0,
-      "Tape rate", "bps" },
-  POPT_TABLEEND
-};
 
 
 //--------------------------------------------------------------------------
@@ -77,16 +64,124 @@ struct poptOption asTAPOptions [] =
 #define PMD_TAP_TXRDY_MASK        (1 << 0)
 /// Mask for status RxRDY bit.
 #define PMD_TAP_RXRDY_MASK        (1 << 1)
+/// Mask for status TxEMPTY bit.
+#define PMD_TAP_TXEMPTY_MASK      (1 << 2)
 
-/// Tape input file handle.
-static int hTapeInput = INVALID_HANDLE;
-/// Tape output file handle.
-static int hTapeOutput = INVALID_HANDLE;
+/// Tape input file stream.
+static std::ifstream oTapeInput;
+/// Tape output file stream.
+static std::ofstream oTapeOutput;
 
 /// Last value of simulated clock at input.
 static int iLastInputClock;
+/// Time of the last byte read from the tape in ms (SDL ticks + 1), 0 if nothing was read yet.
+static std::atomic <Uint32> iLastInputTime (0);
 /// Last value of simulated clock at output.
 static int iLastOutputClock;
+
+/// File of the tape that keeps what the program saves ("TAPESAVE" in the note of the game), empty: the output is dropped.
+static std::string sSavePath;
+/// File of the tape of the game that is read again from its start when the program asks for more data after the
+/// end ("TAPELOOP" in the note of the game: Lemmings, levels loaded by name), empty: no rewinding.
+static std::string sLoopPath;
+/// Time (SDL ticks) of the last try to open the save file for reading.
+static Uint32 iSaveTry = 0;
+
+
+//--------------------------------------------------------------------------
+// File operations
+
+/** Advance to next file.
+ *
+ * @arg oStream Stream to advance.
+ * @arg oNames Names list to use.
+ * @return Indicates whether there was a next file.
+ */
+template <class tStream> bool TAPNextFile (tStream &oStream, std::vector <std::string> &oNames)
+{
+  // Close current file if any.
+  if (oStream.is_open ()) oStream.close ();
+
+  // Open next file if any.
+  if (oNames.empty ()) return (false);
+
+  oStream.clear ();
+  oStream.open (oNames.front ());
+  //oNames.erase (oNames.begin ());
+
+  return (true);
+}
+
+//bool TAPNextInputFile  () { return (TAPNextFile <std::ifstream> (oTapeInput, oArgTapeInputs)); }
+bool TAPNextInputFile  (std::vector <std::string> oArgTapeInputs) { return (TAPNextFile <std::ifstream> (oTapeInput, oArgTapeInputs)); }
+//bool TAPNextOutputFile () { return (TAPNextFile <std::ofstream> (oTapeOutput, oArgTapeOutputs)); }
+bool TAPNextOutputFile (std::vector <std::string> oArgTapeOutputs) { return (TAPNextFile <std::ofstream> (oTapeOutput, oArgTapeOutputs)); }
+
+
+/** Check input file status.
+ *
+ * Advances to next input file as necessary.
+ *
+ * @return Indicates readiness of tape input file.
+ */
+bool TAPInputFileStatus ()
+{
+  // We need to peek to know if there will be data.
+  // Stream end of file flag is set only on access.
+  while (true)
+  {
+    if (oTapeInput.peek () != EOF) return (true);
+    if (!sSavePath.empty ())
+    {
+      // The tape of the game is read to its end: the saved tape follows, from its start (as a rewound cassette),
+      // and again from the start when the program has read it all and asks for data once more. Looking for the
+      // file is limited, the program polls the status very often.
+      Uint32 iNow = SDL_GetTicks ();
+      if (iNow - iSaveTry < 200)
+        return (false);
+      iSaveTry = iNow;
+      // What the program has written must be in the file before it is read.
+      if (oTapeOutput.is_open ()) oTapeOutput.flush ();
+      if (oTapeInput.is_open ()) oTapeInput.close ();
+      oTapeInput.clear ();
+      oTapeInput.open (sSavePath.c_str (), std::ios::binary);
+      if (!oTapeInput.is_open () || oTapeInput.peek () == EOF)
+        return (false);
+      iSaveTry = 0;
+      continue;
+    }
+    if (!sLoopPath.empty ())
+    {
+      // A rewound cassette: the program looks for a block by its name and has passed it.
+      if (oTapeInput.is_open ()) oTapeInput.close ();
+      oTapeInput.clear ();
+      oTapeInput.open (sLoopPath.c_str (), std::ios::binary);
+      if (!oTapeInput.is_open () || oTapeInput.peek () == EOF)
+        return (false);
+      continue;
+    }
+    //if (!TAPNextInputFile ()) return (false);
+    if (!TAPNextInputFile (oArgTapeInputs)) return (false);
+  }
+}
+
+
+/** Check output file status.
+ *
+ * Advances to next output file as necessary.
+ *
+ * @return Indicates readiness of tape output file.
+ */
+bool TAPOutputFileStatus ()
+{
+  // Suffering senseless symmetry :-) ...
+  while (true)
+  {
+    if (oTapeOutput.good ()) return (true);
+    //if (!TAPNextOutputFile ()) return (false);
+    if (!TAPNextOutputFile (oArgTapeOutputs)) return (false);
+  }
+}
 
 
 //--------------------------------------------------------------------------
@@ -96,21 +191,19 @@ static int iLastOutputClock;
  */
 bool TAPStatusRxRDY ()
 {
-  if (iArgTimeTapeInput)
+  if (bArgTimeTapeInput)
   {
     // If the tape input timing is to be simulated,
     // data reads have certain speed.
 
-    int iTimeDelta = Clock - iLastInputClock;
+    int iTimeDelta = iProcessorClock - iLastInputClock;
     int iCharDelta = PMD_TAP_BITS * PMD_CLOCK / iArgTapeRate;
 
     if (iTimeDelta < iCharDelta) return (false);
   }
 
-  // The input stream must be valid.
-  if (hTapeInput == INVALID_HANDLE) return (false);
-
-  return (true);
+  // If timing is fine return input stream status.
+  return (TAPInputFileStatus ());
 }
 
 
@@ -118,21 +211,23 @@ bool TAPStatusRxRDY ()
  */
 bool TAPStatusTxRDY ()
 {
-  if (iArgTimeTapeOutput)
+  // Without an output tape a written byte is dropped, but the character time still has to pass: games
+  // (HLIPA) take the TxRDY bit as their timer.
+  bool bNoOutput = !oTapeOutput.is_open () && oArgTapeOutputs.empty () && sSavePath.empty ();
+  if (bArgTimeTapeOutput || bNoOutput)
   {
     // If the tape output timing is to be simulated,
     // data writes have certain speed.
 
-    int iTimeDelta = Clock - iLastOutputClock;
+    int iTimeDelta = iProcessorClock - iLastOutputClock;
     int iCharDelta = PMD_TAP_BITS * PMD_CLOCK / iArgTapeRate;
 
     if (iTimeDelta < iCharDelta) return (false);
   }
 
-  // The output stream must be valid.
-  if (hTapeOutput == INVALID_HANDLE) return (false);
-
-  return (true);
+  // If timing is fine return output stream status.
+  if (bNoOutput) return (true);
+  return (TAPOutputFileStatus ());
 }
 
 
@@ -143,14 +238,13 @@ bool TAPStatusTxRDY ()
  */
 byte TAPReadData ()
 {
-  byte iData = 0;
-  if (TAPStatusRxRDY)
+  if (TAPStatusRxRDY ())
   {
-    read (hTapeInput, &iData, 1);
-    iLastInputClock = Clock;
+    iLastInputClock = iProcessorClock;
+    iLastInputTime = SDL_GetTicks () + 1;
+    return (oTapeInput.get ());
   }
-
-  return (iData);
+  return (0);
 }
 
 
@@ -158,12 +252,22 @@ byte TAPReadData ()
  *
  *  @arg iData The written value.
  */
-void TAPWriteData (byte iData)
+void TAPWriteData (byte bData)
 {
-  if (TAPStatusTxRDY)
+  if (TAPStatusTxRDY ())
   {
-    write (hTapeOutput, &iData, 1);
-    iLastOutputClock = Clock;
+    iLastOutputClock = iProcessorClock;
+    if (!sSavePath.empty () && !oTapeOutput.is_open ())
+    {
+      // The first byte of a save: a new tape replaces the old one.
+      size_t iSlash = sSavePath.rfind ('/');
+      if (iSlash != std::string::npos)
+        mkdir (sSavePath.substr (0, iSlash).c_str (), 0755);
+      oTapeOutput.clear ();
+      oTapeOutput.open (sSavePath.c_str (), std::ios::binary | std::ios::trunc);
+    }
+    if (oTapeOutput.is_open () || !oArgTapeOutputs.empty ())
+      oTapeOutput.put (bData);
   }
 }
 
@@ -172,27 +276,48 @@ void TAPWriteData (byte iData)
  */
 byte TAPReadStatus ()
 {
-  return (TAPStatusTxRDY () * PMD_TAP_TXRDY_MASK |
-          TAPStatusRxRDY () * PMD_TAP_RXRDY_MASK);
+  // TxEMPTY follows TxRDY, a character is sent at once (FLAPPY2K waits for it before it goes on).
+  bool bTxRdy = TAPStatusTxRDY ();
+  return (bTxRdy * PMD_TAP_TXRDY_MASK |
+          TAPStatusRxRDY () * PMD_TAP_RXRDY_MASK |
+          bTxRdy * PMD_TAP_TXEMPTY_MASK);
 }
 
 
 //--------------------------------------------------------------------------
 // Initialization and shutdown
 
+
 void TAPInitialize ()
 {
-  // If tape input or tape output was specified, open it.
-  if (pArgTapeInput)  hTapeInput  = open (pArgTapeInput, O_RDONLY);
-  if (pArgTapeOutput) hTapeOutput = open (pArgTapeOutput, O_WRONLY);
+  iLastInputTime = 0;
+}
+
+
+void TAPSetSaveFile (const std::string &sPath)
+{
+  sSavePath = sPath;
+  iSaveTry = 0;
+}
+
+
+void TAPSetLoopFile (const std::string &sPath)
+{
+  sLoopPath = sPath;
+}
+
+
+Uint32 TAPLastRead ()
+{
+  return (iLastInputTime);
 }
 
 
 void TAPShutdown ()
 {
   // Close tape input and tape output.
-  if (hTapeInput  != INVALID_HANDLE) close (hTapeInput);
-  if (hTapeOutput != INVALID_HANDLE) close (hTapeOutput);
+  if (oTapeInput.is_open ())  oTapeInput.close ();
+  if (oTapeOutput.is_open ()) oTapeOutput.close ();
 }
 
 

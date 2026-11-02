@@ -18,6 +18,40 @@ limitations under the License.
 
 */
 
+/* MODIFIED
+
+ -Removed options.
+ -Removed console.
+
+ -Added:
+
+ bool TAPNextInputFile (std::vector <std::string> oArgTapeInputs);
+ bool TAPNextOutputFile (std::vector <std::string> oArgTapeOutputs);
+
+ void DSPMenuInitialize ();
+ void DSPLogoInitialize ();
+ void DSPMenuShutdown ();
+ void DSPLogoShutdown ();
+
+ void DSPRenderLogo (int screen_width, int screen_height);
+ void DSPRenderText (int screen_width, int screen_height);
+ void DSPRenderImage (int screen_width, int screen_height);
+ void DSPRenderMenu (int screen_width, int screen_height, int index, const bool *abState);
+
+*/
+
+#include <assert.h>
+#include <stdint.h>
+#include <pthread.h>
+
+#include <atomic>
+#include <iomanip>
+#include <iostream>
+#include <string>
+#include <vector>
+
+#include <SDL2/SDL.h>
+
 
 //--------------------------------------------------------------------------
 // Types
@@ -42,14 +76,12 @@ typedef uint64_t        uint64;
 /// Returns the nearest higher power of two.
 #define POT(X) ({ uint O = 1; uint H = (X); while (H > 1) { H >>= 1; O <<= 1; }; O; })
 
+
 //--------------------------------------------------------------------------
 // System Related Constants
 
-/// Invalid handle value.
-#define INVALID_HANDLE          -1
-
-/// No option to parse.
-#define POPT_NO_NEXT_OPT        -1
+/// Reasonable alignment to prevent cache line ping pong.
+#define SAFE_ALIGNMENT          64
 
 
 //--------------------------------------------------------------------------
@@ -65,73 +97,126 @@ typedef uint64_t        uint64;
 
 
 //--------------------------------------------------------------------------
-// Atomicity
+// Atomics
 
-#if defined (__i386__) || defined (__x86_64__)
-
-class atomic_int
+/// Atomic boolean wrapper with short syntax for relaxed ordering.
+class relaxed_bool
 {
   private:
-    int volatile __attribute__ ((aligned (64))) iContent;
+    std::atomic<bool> bValue __attribute__ ((aligned (SAFE_ALIGNMENT)));
+    bool bPadding __attribute__ ((aligned (SAFE_ALIGNMENT)));
   public:
-    /// Atomically reads the integer value.
-    inline operator int ()
-    {
-      // Reading of aligned value is always atomic.
-      return (iContent);
-    }
-    /// Atomically writes the integer value.
-    inline void operator = (int iValue)
-    {
-      // Writing of aligned value is always atomic.
-      iContent = iValue;
-    }
-    /// Atomically increments the integer value.
-    inline void operator += (int iValue)
-    {
-      asm ("lock ; add %[src],%[dst]"
-        : [dst] "+m" (iContent)
-        : [src] "r" (iValue)
-        : "cc");
-    }
+    relaxed_bool (bool bInitial) : bValue (bInitial) { }
+    inline operator bool () { return (bValue.load (std::memory_order_relaxed)); }
+    inline void operator = (bool bAssignment) { bValue.store (bAssignment, std::memory_order_relaxed); }
 };
 
-#else
-#error Missing atomic type implementation.
-#endif
+/// Atomic integer wrapper with short syntax for relaxed ordering.
+class relaxed_int
+{
+  private:
+    std::atomic<int> iValue __attribute__ ((aligned (SAFE_ALIGNMENT)));
+    int iPadding __attribute__ ((aligned (SAFE_ALIGNMENT)));
+  public:
+    relaxed_int (int iInitial) : iValue (iInitial) { }
+    inline operator int () { return (iValue.load (std::memory_order_relaxed)); }
+    inline void operator = (int iAssignment) { iValue.store (iAssignment, std::memory_order_relaxed); }
+    inline void operator += (int iIncrement) { iValue.fetch_add (iIncrement, std::memory_order_relaxed); }
+    inline void operator -= (int iDecrement) { iValue.fetch_sub (iDecrement, std::memory_order_relaxed); }
+};
 
 
 //--------------------------------------------------------------------------
 // Globals
 
-extern byte MemData [65536];
-extern bool MemMask [65536];
+// To be entirely correct, we should use atomic bytes for memory arrays.
+// This would likely be much syntactic work with little semantic impact.
 
-extern atomic_int Clock;
+extern byte abMemoryData [65536];
+/// 0 read only (ROM), 1 read write, 2 the ROM of the PMD 85-2A is mapped here and a write goes to the RAM under it.
+extern byte abMemoryMask [65536];
 
-extern struct poptOption asDSPOptions [];
-extern struct poptOption asSNDOptions [];
-extern struct poptOption asTAPOptions [];
-extern struct poptOption asTIMOptions [];
+extern relaxed_int iProcessorClock;
+
 
 //--------------------------------------------------------------------------
 // Externals
 
-int CPUThread (void *);
+void SIMRequestShutdown ();
+bool SIMQueryShutdown ();
+
+/// Registers and processor-side ports of the simulated machine, for the saved state.
+struct tCPUState
+{
+  word wPC, wSP;
+  byte bA, bB, bC, bD, bE, bH, bL;
+  /// Flags S, Z, H, P, C as the bits 0 to 4.
+  byte bFlags;
+  /// Output latch of port C of the system 8255 (speaker, ...).
+  byte bPortC;
+  int iClock;
+};
+
+bool CPUPause ();
+void CPUUnpause ();
+void CPUGetState (tCPUState *pState);
+void CPUSetState (const tCPUState *pState);
+void CPURomModuleSet (const byte *pData, size_t iSize);
+
+bool STSave (const std::string &sPath, int iModel);
+const char *STLoad (const std::string &sPath, int iModel);
+
+void CPUReset ();
+void CPUStartThread ();
+void CPUTerminateThread ();
 void CPUInitialize ();
 void CPUShutdown ();
 
 void DSPPaintHandler ();
-void DSPResizeHandler (const SDL_ResizeEvent *);
+void DSPInvalidate ();
+void DSPSetNoBlink (bool);
+bool DSPNoBlink ();
+void DSPSaveScreenshot (const char *pPath);
+void DSPResizeHandler ();
 void DSPInitialize ();
+void DSPMenuInitialize ();
+void DSPLogoInitialize ();
 void DSPShutdown ();
+void DSPMenuShutdown ();
+void DSPLogoShutdown ();
+
+void DSPRenderLogo (int screen_width, int screen_height);
+void DSPRenderText (int screen_width, int screen_height);
+void DSPRenderImage (int screen_width, int screen_height);
+void DSPRenderMenu (int screen_width, int screen_height, int index, const bool *abState);
+void DSPRenderGameList (int screen_width, int screen_height, int index, const std::string &sTitle, const std::vector <std::string> &oNames, const std::vector <std::string> &oNotes, const std::vector <std::string> &oInputs, const std::string &sHelp);
 
 byte KBDReadRow ();
+uint32 KBDScanCount ();
+uint32 KBDSeenCount ();
 byte KBDReadColumn ();
 void KBDWriteColumn (byte iData);
 void KBDEventHandler (const SDL_KeyboardEvent *);
+void KBDSetHold (int iMs);
+
+// PMD 85-2A AllRAM: the monitor ROM at 0x8000-0x8FFF or the RAM under it, chosen by PC4 of the system 8255.
+void CPUAllRamEnable (const byte *pRom);
+void CPUAllRamDisable ();
+bool CPUAllRamActive ();
+/// Flags (bit 0: the ROM is mapped, bit 1: the upper port C is an input) and the 4 kB of RAM under the ROM.
+void CPUAllRamSave (byte *pFlags, byte *pHidden);
+void CPUAllRamRestore (byte iFlags, const byte *pHidden);
+void KBDPoll ();
+bool DSPResolution (int *, int *);
 void KBDInitialize ();
 void KBDShutdown ();
+
+void WEBInitialize (int iPort, const char *pToken, std::string (*pState) ());
+void WEBShutdown ();
+
+void GPDInitialize ();
+void GPDShutdown ();
+void GPDEventHandler (const SDL_Event *);
 
 void SNDSynchronize ();
 void SNDWriteSpeaker (byte iData);
@@ -142,10 +227,15 @@ byte TAPReadData ();
 void TAPWriteData (byte iData);
 byte TAPReadStatus ();
 void TAPInitialize ();
+void TAPSetSaveFile (const std::string &);
+void TAPSetLoopFile (const std::string &);
 void TAPShutdown ();
+Uint32 TAPLastRead ();
+bool TAPNextInputFile (std::vector <std::string> oArgTapeInputs);
+bool TAPNextOutputFile (std::vector <std::string> oArgTapeOutputs);
 
 void TIMSynchronize ();
-void TIMAdvance (int);
+void TIMAdvance ();
 void TIMInitialize ();
 void TIMShutdown ();
 
@@ -165,8 +255,12 @@ void TIMShutdown ();
 /// Display registers while executing.
 #undef DEBUG_CPU_TRACE_REGISTERS
 
+/// Executes a function and makes sure it returned 0.
+#define CheckZero(X) if (X) { assert (false); }
 /// Executes an SDL function and makes sure it returned 0.
 #define SDL_CheckZero(X) if (X) { DEBUG_LOG (SDL_GetError ()); assert (false); }
+/// Executes an SDL function and makes sure it returned TRUE.
+#define SDL_CheckTrue(X) if (!X) { DEBUG_LOG (SDL_GetError ()); assert (false); }
 /// Executes an SDL function and makes sure it did not return NULL.
 #define SDL_CheckNotNull(X) if ((X) == NULL) { DEBUG_LOG (SDL_GetError ()); assert (false); }
 
