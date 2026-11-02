@@ -29,6 +29,13 @@ o COMPILATION
     make install-data PMD_SHARE=$HOME/share/
     PMD_WEB=8085 bin/simpmd
 
+  Saved states (Alt+F5 / Alt+F9) go to <PMD_SHARE>states by default. To keep them
+  in the home directory of every user, give a directory relative to $HOME:
+
+    make PMD_BUILD=RELEASE PMD_SHARE=/usr/share/simpmd/ PMD_STATEHOME=.local/share/simpmd
+
+  (run make clean after changing it; PMD_STATEDIR of the environment overrides both)
+
   Standard (debug) build, run from bin (the data are read from the
   current directory):
 

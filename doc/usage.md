@@ -55,7 +55,9 @@ The state of the running game can be saved and loaded again:
 goes to the PMD 85 only after 120 ms without F5 or F9, so [Ctrl]+[F5] and [Ctrl]+[F9] do not stop the game (STOP reaches
 the game 120 ms later than a plain [Ctrl] press). [Alt] has no such delay, but a window manager may take [Alt]+[F5].
 
-- The file is `<game>.sav` in `PMD_STATEDIR` (default: `states` in the share directory).
+- The file is `<game>.sav` in `PMD_STATEDIR`. Default: `states` in the share directory, or, when `simpmd` was built with
+  `PMD_STATEHOME=<dir>`, `$HOME/<dir>` of the user who runs it (every user has own states, the directory is created
+  with its parents on the first save), see [INSTALL](../INSTALL).
 - Saved: the processor registers, the output latches, the clock and the 64 KB of memory. Not saved: the tape position
   and the keys held on the host.
 - There is no gamepad, TV remote or web button for it yet, only the keyboard.

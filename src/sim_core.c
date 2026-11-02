@@ -363,13 +363,19 @@ static void InitializePMD2A ()
 }
 
 
-/** File of the saved state of a game: PMD_STATEDIR (default "states" in the share directory) and the game name
- *  (the tape name, with or without the share path).
+/** File of the saved state of a game and the game name (the tape name, with or without the share path). The directory is
+ *  PMD_STATEDIR when set; else, when built with PMD_STATEHOME, "$HOME/<PMD_STATEHOME>" of the running user (every user has
+ *  own states); else "states" in the share directory.
  */
 static std::string StatePathOf (const std::string &sTape)
 {
   const char *pDir = getenv ("PMD_STATEDIR");
   std::string sDir = pDir && *pDir ? pDir : PMD_SHARE "states";
+#ifdef PMD_STATEHOME
+  const char *pHome = getenv ("HOME");
+  if (!(pDir && *pDir) && pHome && *pHome)
+    sDir = std::string (pHome) + "/" PMD_STATEHOME;
+#endif
   size_t iSlash = sTape.rfind ('/');
   return (sDir + "/" + (iSlash == std::string::npos ? sTape : sTape.substr (iSlash + 1)) + ".sav");
 }

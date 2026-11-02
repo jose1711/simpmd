@@ -6,9 +6,14 @@ MAKEFLAGS += --no-builtin-rules --no-builtin-variables
 
 PMD_BUILD ?= DEBUG
 PMD_SHARE ?=
+# Directory of the saved states relative to $HOME of the user (e.g. .local/share/simpmd); empty: "states" in PMD_SHARE.
+PMD_STATEHOME ?=
 
 CC = g++
 CC_OPTS = -std=c++11 -D PMD_SHARE=\"$(PMD_SHARE)\"
+ifneq ($(PMD_STATEHOME),)
+CC_OPTS += -D PMD_STATEHOME=\"$(PMD_STATEHOME)\"
+endif
 LD = g++
 LD_OPTS =
 LD_LIBS = -lSDL2 -lSDL2_ttf -lpthread -lrt
