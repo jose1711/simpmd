@@ -29,6 +29,13 @@ o COMPILATION
     make install-data PMD_SHARE=$HOME/share/
     PMD_WEB=8085 bin/simpmd
 
+  Standard (debug) build, run from bin (the data are read from the
+  current directory):
+
+    make
+    make install-data PMD_SHARE=bin/
+    cd bin && ./simpmd
+
 o EXECUTION
 
   The simulator requires that the ROMs M1 and M2 (here M2-Patched-Tape),
