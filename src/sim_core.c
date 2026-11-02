@@ -1106,7 +1106,16 @@ static void EmulationInitialize (const std::string &sTape, int iModel)
     std::string sSaveShared = GameCommandArgument (sTape, "TAPESAVE");
     if (!sSaveShared.empty ())
       sSaveName = sSaveShared;
-    TAPSetSaveFile (GameHasCommand (sTape, "TAPESAVE") ? std::string (PMD_SHARE) + "saves/" + sSaveName : std::string ());
+    std::string sSaveDir = std::string (PMD_SHARE) + "saves/";
+#ifdef PMD_STATEHOME
+    // Built with PMD_STATEHOME: the saved tapes go to "$HOME/<PMD_STATEHOME>/saves" of the running user as well.
+    const char *pHome = getenv ("HOME");
+    if (pHome && *pHome)
+    {
+      sSaveDir = std::string (pHome) + "/" PMD_STATEHOME "/saves/";
+    }
+#endif
+    TAPSetSaveFile (GameHasCommand (sTape, "TAPESAVE") ? sSaveDir + sSaveName : std::string ());
   }
 
   // "TAPELOOP" in the note: the tape is rewound to its start when the program reads past its end.

@@ -262,7 +262,8 @@ void TAPWriteData (byte bData)
       // The first byte of a save: a new tape replaces the old one.
       size_t iSlash = sSavePath.rfind ('/');
       if (iSlash != std::string::npos)
-        mkdir (sSavePath.substr (0, iSlash).c_str (), 0755);
+        for (size_t iPos = sSavePath.find ('/', 1); iPos != std::string::npos && iPos <= iSlash; iPos = sSavePath.find ('/', iPos + 1))
+          mkdir (sSavePath.substr (0, iPos).c_str (), 0755);  // all levels, like mkdir -p
       oTapeOutput.clear ();
       oTapeOutput.open (sSavePath.c_str (), std::ios::binary | std::ios::trunc);
     }

@@ -32,7 +32,7 @@ Dizzy (for the PMD 85-2A/3) sets the bit on large areas, probably as a color tha
 picture would flash.
 
 `TAPESAVE` in the note keeps what the program writes to the tape in `<share>/saves/<tape name>` (a new save replaces
-the file) and reads it back after the tape of the game: when the program asks for tape data again and the tape of the
+the file; when built with `PMD_STATEHOME`, in `$HOME/<PMD_STATEHOME>/saves/<tape name>` of the user, see [INSTALL](../INSTALL)) and reads it back after the tape of the game: when the program asks for tape data again and the tape of the
 game is at its end, the saved file is read from its start, like a rewound cassette. BASIC-G `SAVE n` and `LOAD n` work
 this way (the program stays in the file between runs); it is meant for programs that save (EVIDENCE, editors). Without
 the word the bytes written to the tape are dropped, as before. `TAPESAVE <name>` uses `saves/<name>` instead of the
