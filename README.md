@@ -44,6 +44,14 @@ make install-data PMD_SHARE=$HOME/share/
 Menu: [Left] / [Right] select, [Enter] starts a game, [Up] or [E] opens the list of all games, hold [Esc] to quit.
 Details in [INSTALL](INSTALL).
 
+## Good to know
+
+- **EVIDENCE:** the name of the file to load has exactly 8 characters: `ZAJ.CIN` and a space, `CLEN.ZAK`, `PROGRAMY`, and
+  ` SEZNAM ` with a space at the start and at the end. [F11] switches to capital letters (it types a stray character:
+  press it before the name and clear the field). A wrong name does not give an error: the program passes the whole tape
+  and stays on "Nalezeno: <the last header>". `PROGRAMY` is an empty template ("Žádná data"). More in [doc/games.md](doc/games.md).
+- **Y and Z** are swapped on the PMD 85 keyboard compared to a QWERTY host (the host key `y` is the PMD key `Z`).
+
 ## Documentation
 
 | Topic | File |
