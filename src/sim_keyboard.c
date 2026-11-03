@@ -204,6 +204,7 @@ void KBDEventHandler (const SDL_KeyboardEvent *pEvent)
     case SDL_PRESSED:
       oPressTime [iSym] = iNow;
       oPendingRelease.erase (iSym);
+      TAPKeyPressed ();
       KBDApply (iSym, SDL_PRESSED);
       break;
     case SDL_RELEASED:

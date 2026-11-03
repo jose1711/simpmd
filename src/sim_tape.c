@@ -118,6 +118,34 @@ bool TAPNextInputFile  (std::vector <std::string> oArgTapeInputs) { return (TAPN
 bool TAPNextOutputFile (std::vector <std::string> oArgTapeOutputs) { return (TAPNextFile <std::ofstream> (oTapeOutput, oArgTapeOutputs)); }
 
 
+/// "TAPESIGNAL" of the game (see the signal of the tape below).
+static bool bSignalOn = false;
+/// The input is the saved tape (not the tape of the game).
+static bool bSaveStream = false;
+/// A key was pressed since the saved tape was last started: a program with "TAPESIGNAL" reads the saved tape once and
+/// then finds its end, the next Load (the keys the user presses) starts it from the beginning.
+static bool bSaveRewind = false;
+
+/** A key of the keyboard was pressed. */
+void TAPKeyPressed ()
+{
+  bSaveRewind = true;
+}
+
+/** Opens the saved tape from its start, true when it has data. */
+static bool TAPOpenSaved ()
+{
+  // What the program has written must be in the file before it is read.
+  if (oTapeOutput.is_open ()) oTapeOutput.flush ();
+  if (oTapeInput.is_open ()) oTapeInput.close ();
+  oTapeInput.clear ();
+  oTapeInput.open (sSavePath.c_str (), std::ios::binary);
+  bSaveStream = oTapeInput.is_open ();
+  bSaveRewind = false;
+  return (oTapeInput.is_open () && oTapeInput.peek () != EOF);
+}
+
+
 /** Check input file status.
  *
  * Advances to next input file as necessary.
@@ -126,6 +154,9 @@ bool TAPNextOutputFile (std::vector <std::string> oArgTapeOutputs) { return (TAP
  */
 bool TAPInputFileStatus ()
 {
+  // A new Load of a program with "TAPESIGNAL" (a key was pressed): the saved tape starts again.
+  if (bSignalOn && bSaveStream && bSaveRewind && !sSavePath.empty ())
+    TAPOpenSaved ();
   // We need to peek to know if there will be data.
   // Stream end of file flag is set only on access.
   while (true)
@@ -133,6 +164,10 @@ bool TAPInputFileStatus ()
     if (oTapeInput.peek () != EOF) return (true);
     if (!sSavePath.empty ())
     {
+      // The saved tape is read to its end: no rewinding without a key of the user (the program of "TAPESIGNAL"
+      // looks for the name once, a cassette comes to its end).
+      if (bSignalOn && bSaveStream)
+        return (false);
       // The tape of the game is read to its end: the saved tape follows, from its start (as a rewound cassette),
       // and again from the start when the program has read it all and asks for data once more. Looking for the
       // file is limited, the program polls the status very often.
@@ -140,12 +175,7 @@ bool TAPInputFileStatus ()
       if (iNow - iSaveTry < 200)
         return (false);
       iSaveTry = iNow;
-      // What the program has written must be in the file before it is read.
-      if (oTapeOutput.is_open ()) oTapeOutput.flush ();
-      if (oTapeInput.is_open ()) oTapeInput.close ();
-      oTapeInput.clear ();
-      oTapeInput.open (sSavePath.c_str (), std::ios::binary);
-      if (!oTapeInput.is_open () || oTapeInput.peek () == EOF)
+      if (!TAPOpenSaved ())
         return (false);
       iSaveTry = 0;
       continue;
@@ -240,7 +270,7 @@ bool TAPStatusTxRDY ()
 /// before it reads the bytes (DAT-PMD: the ROM routine 0x8890 counts the time to the next change of the bit) gets what
 /// it expects; the tape runs in the time of the processor while the program looks at the bit and the bytes of the leader
 /// pass by. The bytes are read from the USART as before.
-static bool bSignalOn = false;
+// (bSignalOn is above)
 /// The signal is running: the clock the current bit ends, the clock of the next change, the position in the frame
 /// (0 start bit, 1-8 data bits, 9 stop bit), the level, the clock of the last look at the bit.
 static bool bSignalRun = false;

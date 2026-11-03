@@ -43,7 +43,8 @@ from the bytes of the input tape (a 1 is a fast tone, a 0 a slow one, 2400 Bd) w
 tape runs while it measures it, so the bytes of the leader pass by. The bytes are still read from the USART. It is for a
 program that measures the tape speed itself with the monitor routine 0x8890 before it reads (DAT-PMD): the routine, empty
 in the patched ROM, is back (in the free RAM at 0x9200) and the ROM routine 0x848D returns properly. With `TAPESAVE`
-DAT-PMD saves and loads its data base (Save, Load; the name of the file must be the same). `PMD_TAPETRACE=1` prints the
+DAT-PMD saves and loads its data base (Save, Load; the name of the file must be the same). The saved tape is read once to its end (no endless rewinding: a Load of a missing name
+finds the end of the tape, [Stop] = Ctrl ends it); the next key of the user starts it from the beginning. `PMD_TAPETRACE=1` prints the
 bytes the program reads from the tape.
 
 `TAPELOOP` in the note rewinds the tape of the game when the program reads past its end (the cassette is read from the
