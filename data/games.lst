@@ -73,7 +73,7 @@ JASON;2;MGLD 00;Return=Space;Left:Left,Right:Right,Space:Space,Esc:Escape;mezera
 JERRY;1;MGLD 00, JUMP 1100;Up=E,Down=Z;Left:Left,Right:Right,E up:e,Y down:z,Space:Space,Esc:Escape;Jerry (VBG Software, vsechny modely): titulka Space, potom volba obtiznosti a hra, sipky vlevo a vpravo, E nahoru, Y dolu (pad: D-pad, A = Space);P;
 JOE1;2;ROM basic2.rmm, FONT, TYPE LOAD 1, TYPE RUN;Left=F10,Right=F12,E=F8,Z=F11,Up=F8,Down=F11,Space=F1,Left Shift=F2;Left:F10,Right:F12,Up:F8,Down:F11,K0:F1,K1:F2,Esc:Escape;F11 start a akce, F10 vlevo, F12 vpravo (pad: D-pad, A = F1, LB = F2, B = Enter);P;
 KANKAN;1;MGLD 00, JUMP 0000;;;demo, bez ovladani;PR;Dema
-KAREL;1;MGLD 00, JUMP 0000;;;prikazy z klavesnice (zadavani prikazu), na gamepadu/ovladaci TV nepouzitelne;;Programovani/KAREL
+KAREL;1;MGLD 00, JUMP 0000;;;prikazy z klavesnice (zadavani prikazu);;Programovani/KAREL
 KAREL-2R;1;MGLD 00, JUMP 0000;;;2D Karel (T. Bartovsky): prikazy z klavesnice, vzdy jedno slovo a Enter;;Programovani/KAREL
 KAREL2D;2;ROM basic2.rmm, FONT, TYPE LOAD 22, TYPE RUN;;;2D Karel v Basicu: prikazy z klavesnice, vzdy jedno slovo a Enter;;Programovani/KAREL
 KAREL3D;1;MGLD 00, JUMP 0000;;;prikazy z klavesnice (zadavani prikazu);;Programovani/KAREL3D
