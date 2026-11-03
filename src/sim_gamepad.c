@@ -35,13 +35,14 @@ enum tPadInput
   PAD_UP, PAD_DOWN, PAD_LEFT, PAD_RIGHT,
   PAD_A, PAD_B, PAD_X, PAD_Y,
   PAD_LB, PAD_RB, PAD_BACK, PAD_START,
+  PAD_LT, PAD_RT, PAD_LS, PAD_RS,
   PAD_COUNT
 };
 
 /// Names of the inputs, used by PMD_PAD=<name>=<key>,...
 static const char *apPadName [PAD_COUNT] =
 {
-  "up", "down", "left", "right", "a", "b", "x", "y", "lb", "rb", "back", "start"
+  "up", "down", "left", "right", "a", "b", "x", "y", "lb", "rb", "back", "start", "lt", "rt", "ls", "rs"
 };
 
 /// Default keys, taken from the instructions of the games: up and down are [E] and [Y] of the PMD 85
@@ -53,7 +54,8 @@ static const SDL_Keycode aiPadDefault [PAD_COUNT] =
 {
   SDLK_e, SDLK_z, SDLK_LEFT, SDLK_RIGHT,
   SDLK_SPACE, SDLK_RETURN, SDLK_h, SDLK_i,
-  SDLK_LSHIFT, SDLK_KP_PLUS, SDLK_ESCAPE, SDLK_RETURN
+  SDLK_LSHIFT, SDLK_KP_PLUS, SDLK_ESCAPE, SDLK_RETURN,
+  SDLK_UNKNOWN, SDLK_UNKNOWN, SDLK_UNKNOWN, SDLK_UNKNOWN
 };
 
 /// Stick dead zone, the axis range is -32768 to 32767.
@@ -61,6 +63,8 @@ static const SDL_Keycode aiPadDefault [PAD_COUNT] =
 
 /// Key assigned to each input.
 static SDL_Keycode aiPadKey [PAD_COUNT];
+/// Keys without the per-game overrides (the defaults and PMD_PAD).
+static SDL_Keycode aiPadBase [PAD_COUNT];
 /// Pressed inputs, bit mask by tPadInput (all devices together).
 static Uint32 iPadState;
 /// Pressed inputs of a device, bit masks by tPadInput.
@@ -154,6 +158,8 @@ static int GPDControllerButton (Uint8 iButton)
     case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:   return (PAD_RB);
     case SDL_CONTROLLER_BUTTON_BACK:            return (PAD_BACK);
     case SDL_CONTROLLER_BUTTON_START:           return (PAD_START);
+    case SDL_CONTROLLER_BUTTON_LEFTSTICK:       return (PAD_LS);
+    case SDL_CONTROLLER_BUTTON_RIGHTSTICK:      return (PAD_RS);
   }
   return (-1);
 }
@@ -191,7 +197,7 @@ void GPDInitialize ()
   for (int i = 0 ; i < PAD_COUNT ; i ++)
     aiPadKey [i] = aiPadDefault [i];
   // PMD_PAD=<input>=<key>,... overrides the keys, for example PMD_PAD='a=Space,b=Return,x=H,back=Escape'.
-  // The input names are up, down, left, right, a, b, x, y, lb, rb, back, start, the keys are SDL key names.
+  // The input names are up, down, left, right, a, b, x, y, lb, rb, back, start, lt, rt (triggers), ls, rs (stick clicks), no key by default, the keys are SDL key names.
   const char *pPad = getenv ("PMD_PAD");
   if (pPad)
   {
@@ -224,6 +230,37 @@ void GPDInitialize ()
       if (!bFound)
         fprintf (stderr, "PMD_PAD: unknown input in '%s'\n", sItem.c_str ());
     }
+  }
+  for (int i = 0 ; i < PAD_COUNT ; i ++)
+    aiPadBase [i] = aiPadKey [i];
+}
+
+
+/** Keys of the pad for the running game: "input=key,..." (the names of PMD_PAD), the rest is as without a game.
+ *  Called when a game starts (REMAP "pad:lb=F2,pad:rb=F3" in games.lst) and with an empty text when it ends.
+ */
+void GPDSetGameKeys (const std::string &sSpec)
+{
+  for (int i = 0 ; i < PAD_COUNT ; i ++)
+    aiPadKey [i] = aiPadBase [i];
+  size_t iPos = 0;
+  while (iPos < sSpec.size ())
+  {
+    size_t iEnd = sSpec.find (',', iPos);
+    if (iEnd == std::string::npos)
+      iEnd = sSpec.size ();
+    std::string sItem = sSpec.substr (iPos, iEnd - iPos);
+    iPos = iEnd + 1;
+    size_t iEqual = sItem.find ('=');
+    if (iEqual == std::string::npos)
+      continue;
+    std::string sName = sItem.substr (0, iEqual);
+    SDL_Keycode iKey = SDL_GetKeyFromName (sItem.substr (iEqual + 1).c_str ());
+    if (iKey == SDLK_UNKNOWN)
+      continue;
+    for (int i = 0 ; i < PAD_COUNT ; i ++)
+      if (sName == apPadName [i])
+        aiPadKey [i] = iKey;
   }
 }
 
@@ -277,7 +314,17 @@ void GPDEventHandler (const SDL_Event *pEvent)
       break;
     }
     case SDL_CONTROLLERAXISMOTION:
-      if (pEvent->caxis.axis == SDL_CONTROLLER_AXIS_LEFTX)
+      if (pEvent->caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT || pEvent->caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT)
+      {
+        // Triggers are axes 0..32767: pressed over a quarter of the travel, released under a tenth (hysteresis).
+        Uint32 iMask = 1u << (pEvent->caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT ? PAD_LT : PAD_RT);
+        bool bHeld = (oDeviceState [pEvent->caxis.which].iButtons & iMask) != 0;
+        if (!bHeld && pEvent->caxis.value > 8000)
+          GPDSetInput (pEvent->caxis.which, iMask, true);
+        else if (bHeld && pEvent->caxis.value < 3000)
+          GPDSetInput (pEvent->caxis.which, iMask, false);
+      }
+      else if (pEvent->caxis.axis == SDL_CONTROLLER_AXIS_LEFTX)
         GPDAxis (pEvent->caxis.which, false, pEvent->caxis.value);
       else if (pEvent->caxis.axis == SDL_CONTROLLER_AXIS_LEFTY)
         GPDAxis (pEvent->caxis.which, true, pEvent->caxis.value);

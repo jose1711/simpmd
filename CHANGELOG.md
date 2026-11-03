@@ -4,6 +4,12 @@ Changes since the original SDL 1 version (tag `sdl1-final`, the last upstream co
 The version numbers are not used; the dates are the dates of the work in the
 [pmd85console](https://github.com/jose1711/pmd85console) repository the code comes from.
 
+## 2026-11-03
+
+- Games for the youngest (`Pro nejmensi`): DOMCEKY, POSTARIK, ROBOTIK, SASKO, ZMRZLINY use the model 2 (their texts are in
+  lower case, which the model 1 can not draw), the arrows are F1-F4 (K0-K3), Enter / F5 confirm, F12 is the menu, F6 is K5.
+- Gamepad keys per game: `pad:<input>=<key>` in `REMAP` (`doc/games.md`); new inputs `lt`, `rt` (triggers), `ls`, `rs` (stick clicks).
+
 ## 2026-11-02
 
 - New category `Naucne` (educational programs): BUBLSORT, GONIO, LISSAJ, MESIAC, REZ, ELEKTRO, TESTLOG.

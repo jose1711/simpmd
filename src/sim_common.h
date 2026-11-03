@@ -215,6 +215,7 @@ void WEBInitialize (int iPort, const char *pToken, std::string (*pState) ());
 void WEBShutdown ();
 
 void GPDInitialize ();
+void GPDSetGameKeys (const std::string &);
 void GPDShutdown ();
 void GPDEventHandler (const SDL_Event *);
 

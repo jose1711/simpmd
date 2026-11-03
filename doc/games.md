@@ -302,6 +302,15 @@ It applies to the keyboard, the gamepad and the browser alike.
   OK stays [Enter] (start of the game, end of the initials) and [Down] types `A`, so the initials after a game
   ("AAAAA") can be typed with the remote.
 
+### Gamepad keys per game in `REMAP`
+
+`pad:<input>=<key>` sets the key of a gamepad input for this game only (the rest stays as without it; it is not
+changed by the other `REMAP` items, they apply to host keys). The inputs: `up`, `down`, `left`, `right`, `a`, `b`, `x`,
+`y`, `lb`, `rb`, `back`, `start`, `lt`, `rt` (the triggers), `ls`, `rs` (the stick clicks); the triggers and the
+stick clicks have no key by default. Example (the games for the youngest): `Left=F1,Down=F2,Up=F3,Right=F4,pad:left=F1,
+pad:down=F2,pad:up=F3,pad:right=F4,pad:a=Space,pad:b=F5,pad:start=Return,pad:back=F12,pad:ls=Keypad +,pad:rs=Keypad +`.
+The triggers work for a pad that SDL knows as a game controller.
+
 ### Short, long and held keys in `REMAP`
 
 `HostKey=Short|Long[|Held]` (any key of `REMAP`):

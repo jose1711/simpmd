@@ -772,6 +772,7 @@ static void KeysRemap (const std::string &sTape)
   bLongDown = false;
   iLongSerial ++;
   sPad = pPadGame;
+  std::string sPadKeys;
   std::string sName = sTape;
   size_t iShare = strlen (PMD_SHARE);
   if (sName.compare (0, iShare, PMD_SHARE) == 0)
@@ -791,6 +792,12 @@ static void KeysRemap (const std::string &sTape)
         iEnd = sRemap.size ();
       std::string sPair = sRemap.substr (iPos, iEnd - iPos);
       iPos = iEnd + 1;
+      // "pad:<input>=<key>": the key of a gamepad input in this game (GPDSetGameKeys)
+      if (sPair.compare (0, 4, "pad:") == 0)
+      {
+        sPadKeys += (sPadKeys.empty () ? "" : ",") + sPair.substr (4);
+        continue;
+      }
       size_t iEqual = sPair.find ('=');
       if (iEqual == std::string::npos)
         continue;
@@ -827,6 +834,7 @@ static void KeysRemap (const std::string &sTape)
       }
     }
   }
+  GPDSetGameKeys (sPadKeys);
 }
 
 
@@ -1167,6 +1175,7 @@ static void EmulationInitialize (const std::string &sTape, int iModel)
 static void EmulationShutdown ()
 {
   sKeys.clear ();
+  GPDSetGameKeys (std::string ());
   CPUTerminateThread ();
   printf("CPU Thread shutdown..\n");
 
