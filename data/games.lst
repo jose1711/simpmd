@@ -76,7 +76,7 @@ KANKAN;1;MGLD 00, JUMP 0000;;;demo, bez ovladani;PR;Dema
 KAREL;1;MGLD 00, JUMP 0000;;;prikazy z klavesnice (zadavani prikazu), na gamepadu/ovladaci TV nepouzitelne;;Programovani/KAREL
 KAREL-2R;1;MGLD 00, JUMP 0000;;;2D Karel (T. Bartovsky): prikazy z klavesnice, vzdy jedno slovo a Enter;;Programovani/KAREL
 KAREL2D;2;ROM basic2.rmm, FONT, TYPE LOAD 22, TYPE RUN;;;2D Karel v Basicu: prikazy z klavesnice, vzdy jedno slovo a Enter;;Programovani/KAREL
-KAREL3D;1;MGLD 00, JUMP 0000;;;prikazy z klavesnice (zadavani prikazu), na gamepadu/ovladaci TV nepouzitelne;;Programovani/KAREL3D
+KAREL3D;1;MGLD 00, JUMP 0000;;;prikazy z klavesnice (zadavani prikazu);;Programovani/KAREL3D
 KAREL3D0;1;MGLD 00, JUMP 0000;;;3D Karel v0.0 (M. Vittek): prikazy z klavesnice;;Programovani/KAREL3D
 KAREL3D2;1;MGLD 00, JUMP 0000;;;3D Karel v2.0 (M. Vittek): prikazy z klavesnice;;Programovani/KAREL3D
 KON;2;ROM basic2.rmm, FONT, TYPE LOAD 4, TYPE RUN;;;souradnice tahu z klavesnice, odpoved ANO nebo NE;;Deskove hry
