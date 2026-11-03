@@ -107,7 +107,7 @@ MANIC+;1;MGLD 02;Space=Left Shift,Up=@Left Shift,Down=A;Left:Left,Right:Right,Ju
 MANIC+2;2;MGLD 01;;;Manic Miner pro PMD 85-2;;MANIC
 MANIC-1;1;MGLD 00;Space=Left Shift,Up=@Left Shift,Down=A;Left:Left,Right:Right,Jump:Left Shift,Jump left:Left Shift&Left,Jump right:Left Shift&Right,Enter:Return,S:s,F1:F1,Esc:Escape;sipky, skok: Shift, Space nebo sipka nahoru (skace ve smeru chuze), OK = Enter (start, konec jmena), sipka dolu = A (jmeno do tabulky), S, F1;PR;MANIC
 MANIC-2;2;MGLD 03;Space=Left Shift,Up=@Left Shift,Down=A;Left:Left,Right:Right,Jump:Left Shift,Jump left:Left Shift&Left,Jump right:Left Shift&Right,Enter:Return,S:s,F1:F1,Esc:Escape;sipky, skok: Shift, Space nebo sipka nahoru (skace ve smeru chuze), OK = Enter (start, konec jmena), sipka dolu = A (jmeno do tabulky), S, F1;PR;MANIC
-MATODEMO;2;ROM basic2.rmm, FONT, TYPE LOAD 55, TYPE RUN;;;ukazka pocitace MATO: bez ovladani;;Dema
+MATODEMO;2;ROM basic2.rmm, FONT, TYPE LOAD 55, TYPE RUN;;;ukazka pocitace MATO: bez ovladani;PR;Dema
 MESIAC;2;ROM basic2.rmm, FONT, TYPE LOAD 23, TYPE RUN;;;mezernik pokracuje;;Naucne
 MESTO;1;MGLD 00;;;HESLO: konvalinka (textova hra);;Textove adventury
 BKP;1;MGLD 0E;;;Bratrstvo kocici pracky (Petr K. a Libor L.A., 2023), textova hra v cestine: B barva (Mono, RGBM, Video, ACE), Enter = start, prikazy z klavesnice: SEVER JIH ZAPAD VYCHOD NAHORU DOLU DOVNITR VEN, PROZKOUMEJ SEBER POLOZ POUZIJ OTEVRI DEJ OSLOV, I inventura, SKORE SLOVNIK POMOC, RS RL ulozeni do RAM, K konec;;Textove adventury
