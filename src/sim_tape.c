@@ -231,6 +231,82 @@ bool TAPStatusTxRDY ()
 }
 
 
+
+//--------------------------------------------------------------------------
+// Tape signal on the DSR input (bit 7 of the status register)
+
+/// "TAPESIGNAL" in the note: the status bit 7 carries the signal of the tape, as a frequency modulated tone made from
+/// the bytes of the input tape (a 1 is a fast tone, a 0 a slow one). A program that measures the tape signal itself
+/// before it reads the bytes (DAT-PMD: the ROM routine 0x8890 counts the time to the next change of the bit) gets what
+/// it expects; the tape runs in the time of the processor while the program looks at the bit and the bytes of the leader
+/// pass by. The bytes are read from the USART as before.
+static bool bSignalOn = false;
+/// The signal is running: the clock the current bit ends, the clock of the next change, the position in the frame
+/// (0 start bit, 1-8 data bits, 9 stop bit), the level, the clock of the last look at the bit.
+static bool bSignalRun = false;
+static long long iSignalBitEnd = 0, iSignalNextToggle = 0, iSignalLast = 0;
+static int iSignalIndex = 0, iSignalLevel = 1;
+static long long iSignalHalf1 = 0, iSignalHalf0 = 0;
+
+void TAPSetSignal (bool bOn)
+{
+  bSignalOn = bOn;
+  bSignalRun = false;
+  const char *pH1 = getenv ("PMD_DSR_H1");
+  const char *pH0 = getenv ("PMD_DSR_H0");
+  iSignalHalf1 = pH1 ? atoi (pH1) : PMD_CLOCK / iArgTapeRate / 2;
+  iSignalHalf0 = pH0 ? atoi (pH0) : PMD_CLOCK / iArgTapeRate;
+}
+
+/// The bit of the frame of the byte that is next on the tape: start 0, the data bits from the lowest, stop 1.
+static int TAPSignalBit (int iByte, int iIndex)
+{
+  if (iIndex == 0) return (0);
+  if (iIndex <= 8) return ((iByte >> (iIndex - 1)) & 1);
+  return (1);
+}
+
+/// Level of the signal now.
+static int TAPSignalLevel ()
+{
+  long long iNow = iProcessorClock;
+  const long long iBit = PMD_CLOCK / iArgTapeRate;
+  if (!bSignalRun || iNow - iSignalLast > 40000)
+  {
+    // The program has not looked for a while (the tape stands): the signal starts again from the next byte.
+    bSignalRun = true;
+    iSignalIndex = 0;
+    iSignalBitEnd = iNow + iBit;
+    iSignalNextToggle = iNow + iSignalHalf0;
+  }
+  iSignalLast = iNow;
+  for (int iGuard = 0 ; iGuard < 4000 ; iGuard ++)
+  {
+    if (!TAPInputFileStatus ())
+      return (1);
+    int iByte = oTapeInput.peek ();
+    int iBitValue = TAPSignalBit (iByte, iSignalIndex);
+    long long iEvent = iSignalNextToggle < iSignalBitEnd ? iSignalNextToggle : iSignalBitEnd;
+    if (iEvent > iNow)
+      break;
+    if (iSignalNextToggle <= iSignalBitEnd)
+    {
+      iSignalLevel ^= 1;
+      iSignalNextToggle += iBitValue ? iSignalHalf1 : iSignalHalf0;
+    }
+    else
+    {
+      iSignalBitEnd += iBit;
+      if (++ iSignalIndex >= PMD_TAP_BITS)
+      {
+        iSignalIndex = 0;
+        oTapeInput.get ();
+      }
+    }
+  }
+  return (iSignalLevel);
+}
+
 //--------------------------------------------------------------------------
 // Port operations
 
@@ -242,7 +318,12 @@ byte TAPReadData ()
   {
     iLastInputClock = iProcessorClock;
     iLastInputTime = SDL_GetTicks () + 1;
-    return (oTapeInput.get ());
+    bSignalRun = false;
+    int iByte = oTapeInput.get ();
+    static const bool bTrace = getenv ("PMD_TAPETRACE") != NULL;
+    if (bTrace)
+      fprintf (stderr, "TAPREAD %02x clock %d\n", iByte & 0xFF, (int) iProcessorClock);
+    return (iByte);
   }
   return (0);
 }
@@ -281,7 +362,8 @@ byte TAPReadStatus ()
   bool bTxRdy = TAPStatusTxRDY ();
   return (bTxRdy * PMD_TAP_TXRDY_MASK |
           TAPStatusRxRDY () * PMD_TAP_RXRDY_MASK |
-          bTxRdy * PMD_TAP_TXEMPTY_MASK);
+          bTxRdy * PMD_TAP_TXEMPTY_MASK |
+          (bSignalOn ? TAPSignalLevel () << 7 : 0));
 }
 
 

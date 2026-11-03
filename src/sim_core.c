@@ -403,7 +403,7 @@ static std::string ListNote (const std::string &sNote)
     iPos = iEnd + 1;
     while (!sPart.empty () && sPart [0] == ' ')
       sPart.erase (0, 1);
-    if (sPart == "FONT" || sPart == "NOBLINK" || sPart == "TAPELOOP" || sPart.compare (0, 8, "TAPESAVE") == 0 || sPart.compare (0, 7, "KEYHOLD") == 0)
+    if (sPart == "FONT" || sPart == "NOBLINK" || sPart == "TAPESIGNAL" || sPart == "TAPELOOP" || sPart.compare (0, 8, "TAPESAVE") == 0 || sPart.compare (0, 7, "KEYHOLD") == 0)
       continue;
     if (sPart.compare (0, 4, "ROM ") == 0 || sPart.compare (0, 5, "TYPE ") == 0)
       bBasic = bBasic || sPart.find ("basic") != std::string::npos;
@@ -587,6 +587,38 @@ static std::string GameCommandArgument (const std::string &sTape, const char *sC
  *  glyphs made here from the letter of the monitor font and a mark, at 0x9000 and 0x9100 (free RAM of the emulator).
  *  The codes are the ones that the programs use in words (a sample: REVERZ and the others of the basic package).
  */
+/** "TAPESIGNAL" in the note: the routine of the monitor 0x8890 (counts the time to the next change of the status bit 7,
+ *  returns the rest of the counter in C) is back, the patched ROM has it empty and the ROM has no free place. It goes
+ *  to the free RAM of the emulator at 0x9200, 0x8890 jumps there.
+ */
+static void SignalRomPatch ()
+{
+  static const byte abRoutine [] = {
+    0x0E, 0x25,             // 9200  mvi c,25
+    0xDB, 0x1F,             // 9202  in 1f
+    0x67,                   // 9204  mov h,a
+    0x0D,                   // 9205  dcr c
+    0xC8,                   // 9206  rz
+    0xDB, 0xF5,             // 9207  in f5
+    0xE6, 0x40,             // 9209  ani 40  (the key STOP ends it)
+    0xC8,                   // 920B  rz
+    0xDB, 0x1F,             // 920C  in 1f
+    0xAC,                   // 920E  xra h
+    0xF2, 0x05, 0x92,       // 920F  jp 9205
+    0xC9                    // 9212  ret
+  };
+  memcpy (abMemoryData + 0x9200, abRoutine, sizeof (abRoutine));
+  abMemoryData [0x8890] = 0xC3;       // jmp 9200
+  abMemoryData [0x8891] = 0x00;
+  abMemoryData [0x8892] = 0x92;
+  // The ROM routine 0x848D (push bc, de, hl, jump to 0x8B80: the synchronisation to the first bit after the calibration
+  // of the tape speed, a copy of it is in the program) has nothing to do with the bytes read from the USART, but the
+  // patched ROM ends it with a bare return: it has to take the registers back and return A = 0.
+  static const byte abSync [] = { 0xAF, 0xE1, 0xD1, 0xC1, 0xC9 };  // xra a, pop hl, pop de, pop bc, ret
+  memcpy (abMemoryData + 0x8B80, abSync, sizeof (abSync));
+}
+
+
 static void FontPatch ()
 {
   struct tLetter { byte iCode; char cBase; char cMark; };
@@ -1128,6 +1160,7 @@ static void EmulationInitialize (const std::string &sTape, int iModel)
 
   // "TAPELOOP" in the note: the tape is rewound to its start when the program reads past its end.
   TAPSetLoopFile (GameHasCommand (sTape, "TAPELOOP") ? sTape : std::string ());
+  TAPSetSignal (GameHasCommand (sTape, "TAPESIGNAL"));
 
   KeysStart (sTape);
   RomModuleLoad (sTape);
@@ -1144,6 +1177,8 @@ static void EmulationInitialize (const std::string &sTape, int iModel)
       InitializePMD2 ();
     if (GameHasCommand (sTape, "FONT"))
       FontPatch ();
+    if (GameHasCommand (sTape, "TAPESIGNAL"))
+      SignalRomPatch ();
   }
   else
     InitializePMD1();

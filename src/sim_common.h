@@ -230,6 +230,7 @@ byte TAPReadStatus ();
 void TAPInitialize ();
 void TAPSetSaveFile (const std::string &);
 void TAPSetLoopFile (const std::string &);
+void TAPSetSignal (bool);
 void TAPShutdown ();
 Uint32 TAPLastRead ();
 bool TAPNextInputFile (std::vector <std::string> oArgTapeInputs);

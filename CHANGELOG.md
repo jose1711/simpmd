@@ -6,6 +6,7 @@ The version numbers are not used; the dates are the dates of the work in the
 
 ## 2026-11-03
 
+- DAT-PMD: Save and Load of the data base on the virtual tape (`TAPESAVE`, new `TAPESIGNAL`: the tape signal on the status bit 7).
 - Games for the youngest (`Pro nejmensi`): DOMCEKY, POSTARIK, ROBOTIK, SASKO, ZMRZLINY use the model 2 (their texts are in
   lower case, which the model 1 can not draw), the arrows are F1-F4 (K0-K3), Enter / F5 confirm, F12 is the menu, F6 is K5.
 - Gamepad keys per game: `pad:<input>=<key>` in `REMAP` (`doc/games.md`); new inputs `lt`, `rt` (triggers), `ls`, `rs` (stick clicks).

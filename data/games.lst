@@ -92,7 +92,7 @@ TEXTEDIT;1;MGLD 00, JUMP 0000;;;textovy editor TEXTEDIT, ovladani podle nabidky 
 DDT;1;MGLD 00, JUMP 6000;;;DDT: ladici program (monitor a disassembler) od adresy 6000, ovladani podle nabidky na obrazovce;;Programovani
 MRS;1;MGLD 00, JUMP 6000;;;MRS: assembler, monitor a debugger (menu ASSEMBLER-MONITOR-DEBUGGER-QUIT), ovladani podle nabidky na obrazovce;;Programovani
 SYSTEL;1;MGLD 00;;;SYSTEL (Elsoft, Kosice): system pro strojovy kod procesoru 8080, ovladani podle nabidky na obrazovce;;Programovani
-DAT-PMD;2;MGLD 00, JUMP 0000, TAPESAVE;;;databanka programu Dat PMD pro PMD 85-2, ovladani podle nabidky na obrazovce;;Programy
+DAT-PMD;2;MGLD 00, JUMP 0000, TAPESIGNAL, TAPESAVE;;;databanka programu Dat PMD pro PMD 85-2, ovladani podle nabidky na obrazovce;;Programy
 ELEKTRO;2;MGLD 00, JUMP 0000;;;ELEKTRO (Ceres Soft): program s obrazky a vykladem, ovladani podle nabidky na obrazovce;;Naucne
 FLARE+;2;MGLD 00, JUMP 5000;;;textovy editor Flare+, ovladani podle nabidky na obrazovce;;Programy
 GRED;2;MGLD 00;;;graficky editor GRED pro PMD 85-2 a 2A (S. Kneifl a K. Suhajda), ovladani podle nabidky na obrazovce;;Programy

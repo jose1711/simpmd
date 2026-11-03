@@ -38,6 +38,14 @@ this way (the program stays in the file between runs); it is meant for programs 
 the word the bytes written to the tape are dropped, as before. `TAPESAVE <name>` uses `saves/<name>` instead of the
 tape name, so that two games share one tape: EVIDEDIT writes the data files that EVIDENCE reads.
 
+`TAPESIGNAL` in the note puts the signal of the tape on the bit 7 of the tape status register (DSR): a tone made in time
+from the bytes of the input tape (a 1 is a fast tone, a 0 a slow one, 2400 Bd) while the program looks at the bit; the
+tape runs while it measures it, so the bytes of the leader pass by. The bytes are still read from the USART. It is for a
+program that measures the tape speed itself with the monitor routine 0x8890 before it reads (DAT-PMD): the routine, empty
+in the patched ROM, is back (in the free RAM at 0x9200) and the ROM routine 0x848D returns properly. With `TAPESAVE`
+DAT-PMD saves and loads its data base (Save, Load; the name of the file must be the same). `PMD_TAPETRACE=1` prints the
+bytes the program reads from the tape.
+
 `TAPELOOP` in the note rewinds the tape of the game when the program reads past its end (the cassette is read from the
 start again). It is for programs that load data by name from their own tape: LEMMINGS (sectors) and TVARE (levels).
 
