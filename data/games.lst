@@ -24,6 +24,9 @@
 #FAMILY MYTH
 #FAMILY Programovani/TINYBASIC
 #FAMILY FRED
+#FAMILY Programovani/DAM
+#FAMILY Programovani/VMON
+#FAMILY Programovani/MRAVEC
 # Games offered by the list menu (Up or [E] in the menu), one per line: NAME;MODEL;NOTE[;REMAP[;PAD[;KEYS[;INPUT]]]]
 # KEYS is a free text with the controls, shown under the list for the selected game (no diacritics).
 # INPUT lists the devices besides the keyboard the game can be played with, shown as icons left of the name: P gamepad
@@ -96,10 +99,10 @@ GRED;2;MGLD 00;;;graficky editor GRED pro PMD 85-2 a 2A (S. Kneifl a K. Suhajda)
 GREP;2;MGLD 00;;;graficky editor GREP2 (K. Suhajda), ovladani podle nabidky na obrazovce;;Programy
 KARTOTEK;2;MGLD 00, JUMP 0030;;;kartoteka KARTOTEKA, ovladani podle nabidky na obrazovce;;Programy
 MUSICA;2;MGLD 00, JUMP 7077;;;hudebni editor MUSICA (K. Suhajda, verze pro PMD 85-2, Ceres Soft 1988): I = instrukce, S = spusteni programu, ovladani podle nabidky na obrazovce;;Programy
-DAM+2;2;MGLD 00;;;DAM+2: univerzalni monitor a assembler (K. Suhajda, 1988), ovladani podle nabidky na obrazovce;;Programovani
-DAM+9000;2;MGLD 00, JUMP 9000;;;DAM+2 pro adresu 9000, ovladani podle nabidky na obrazovce;;Programovani
-VMON;2;MGLD 00, JUMP E900;;;VMON 2.1: monitor a debugger (Ceres Soft), ovladani podle nabidky na obrazovce;;Programovani
-VMON9000;2;MGLD 00, JUMP 9000;;;VMON 2.2 od adresy 9000 (Ceres Soft), ovladani podle nabidky na obrazovce;;Programovani
+DAM+2;2;MGLD 00;;;DAM+2: univerzalni monitor a assembler (K. Suhajda, 1988), ovladani podle nabidky na obrazovce;;Programovani/DAM
+DAM+9000;2;MGLD 00, JUMP 9000;;;DAM+2 pro adresu 9000, ovladani podle nabidky na obrazovce;;Programovani/DAM
+VMON;2;MGLD 00, JUMP E900;;;VMON 2.1: monitor a debugger (Ceres Soft), ovladani podle nabidky na obrazovce;;Programovani/VMON
+VMON9000;2;MGLD 00, JUMP 9000;;;VMON 2.2 od adresy 9000 (Ceres Soft), ovladani podle nabidky na obrazovce;;Programovani/VMON
 KURA;1;MGLD 00, JUMP 0000;Space=F1,Return=F2,H=F8,I=F9,Left Shift=F12;Down left:F1,Down right:F2,Up left:F8,Up right:F9,New game:F12,Esc:Escape;F1 vlevo dole, F2 vpravo dole, F8 vlevo nahoru, F9 vpravo nahoru, F12 nova hra (pad: A, B, X, Y, LB);P;
 LAVICKA;2;ROM basic2.rmm, FONT, TYPE LOAD 0, TYPE RUN;;;F1 vlevo nahoru, F2 vlevo dolu, F9 vpravo dolu, F10 vpravo nahoru, odpovedi ANO/NIE z klavesnice;;
 LISSAJ;2;ROM basic2.rmm, FONT, TYPE LOAD 9, TYPE RUN;;;ukazka: bezi sama;;Naucne
@@ -115,7 +118,7 @@ MICRHYTM;1;MGLD 05;;Left:Left,Right:Right,Enter:Return,1:1,2:2,P:p,S:s,Esc:Escap
 MINY;1;MGLD 0C;Up=End,E=End,Space=Up,H=PageUp,I=F2;Left:Left,Right:Right,Up:End,Down:Down,Open:Up,Flag:PageUp,Restart:F2,Start:Return,Esc:Escape;Miny (hledani min, Libor L.A. 2021, jen model 1 pro tento zavadec): menu L obtiznost, C barvy, M mys (602 neni), Enter start, I info, hra: sipky vlevo vpravo dolu, nahoru = sipka nahoru, Space otevre policko, H oznaci (CLR), F2 restart, Esc zpet do menu (pad: D-pad, A = otevrit, X = oznacit);P;
 VLAK;1;MGLD 00;Up=Q,Down=A,Left=O,Right=P,E=Q,Z=A;Left:O,Right:P,Up:Q,Down:A,Password:F4,Esc:Escape;Vlak (Miroslav Nemecek 1993, port Libor L.A. 2025, jen model 1 pro tento zavadec): na titulce J joystick, Z zvuk, C barvy, libovolna klavesa start, hra QAOP, F4 heslo, Esc zpet na titulku (pad: D-pad);P;
 MISSION;1;MGLD 06;;;Super Mission (M. Urda): G hra, R nahravani;;
-MRAVEC;2;ROM basic2.rmm, FONT, TYPE LOAD 34, TYPE RUN;;;jednoduchy logicky jazyk Mravec: prikazy z klavesnice;;Programovani
+MRAVEC;2;ROM basic2.rmm, FONT, TYPE LOAD 34, TYPE RUN;;;jednoduchy logicky jazyk Mravec: prikazy z klavesnice;;Programovani/MRAVEC
 MTRON-1;1;MGLD 00;;;zadani inicialu;;MTRON
 MTRON-2;1;MGLD 00;;;zadani inicialu;;MTRON
 MTRON-3;1;MGLD 00;;;zadani inicialu;;MTRON
@@ -154,7 +157,7 @@ SPINDIZZY;2A;MGLD 00;Up=Q,Down=A,Left=O,Right=P,E=Q,Z=A,H=N,I=M,Return=Space;Up:
 HIGHENC;2A;MGLD 00;Left=O,Right=P,Up=Q,Down=A,E=Q,Z=A,I=5,Return=Space;Left:O,Right:P,Fast:Q,Slow:A,Fire:Space,Hold:H,Start:5,Info:3,Esc:Escape;Highway Encounter (Vortex Software 1985, port RM-TEAM 2016, jen PMD 85-2A a 3): v menu 5 = start, 1 klavesnice, 2 joystick, 3 informace, 4 ukazka, O vlevo, P vpravo, Q rychle, A pomalu, Space palba, H drzet, T a C konec hry (pad: D-pad, A = Space, X = H, Y = 5);P;
 KUBANOID;1;MGLD 00;Left=O,Right=P,Up=Q,Down=A,E=Q,Z=A,I=S,Return=Space;Left:O,Right:P,Rotate up:Q,Rotate down:A,Drop:Space,Start:S,Esc:Escape;Kubanoid (Stardust 2025, port RM-TEAM a X-Agon 2026, logicka hra): menu S start, K klavesnice, J joystick, D definice klaves, F barvy, T terc, H hudba (MIF 85 neni), hra O vlevo, P vpravo, Q a A otaceni kostek, Space rychly pad (pad: D-pad, A = Space, Y = S);P;
 STRIPPED;1;MGLD 03;Z=D,Down=D,Up=E;Up:e,Down:d,Fire:Space,1:1,2:2,3:3,4:4,Esc:Escape;E hore, D dole, Space strelba, menu cisly 1 ovladani, 2 start hry, 4 konec, 5 smazat rekord (po G chvili pocka na titulce);;
-T.MRAVEC;2;ROM basic2.rmm, FONT, TYPE LOAD 52, TYPE RUN;;;Toci-Mravec: velikost desky 4 az 8 (cislo), potom prikazy z klavesnice;;Programovani
+T.MRAVEC;2;ROM basic2.rmm, FONT, TYPE LOAD 52, TYPE RUN;;;Toci-Mravec: velikost desky 4 az 8 (cislo), potom prikazy z klavesnice;;Programovani/MRAVEC
 TANK;1;MGLD 00, JUMP 2000;;;;;2 hraci
 TANKY;2;ROM basic2.rmm, FONT, TYPE LOAD 53, TYPE RUN;E=F2,Z=F1,Up=F2,Down=F1,Return=F4,Space=F4;Down:F1,Up:F2,Fire:F4,Esc:Escape;F1 dolu, F2 nahoru, F4 palba (K0, K1, K3), pak libovolna klavesa;PR;2 hraci
 TAVA;2;ROM basic2.rmm, FONT, TYPE LOAD 5, TYPE RUN;;;text hra: F1 ano, F2 ne (instrukce), prikazy z klavesnice;;Textove adventury
