@@ -6,6 +6,7 @@ The version numbers are not used; the dates are the dates of the work in the
 
 ## 2026-11-03
 
+- New word `TAPEAUTOREWIND` in the note: the tape of the game starts again when it is read to its end (EVIDENCE: a wrong file name can be corrected without a restart).
 - DAT-PMD: Save and Load of the data base on the virtual tape (`TAPESAVE`, new `TAPESIGNAL`: the tape signal on the status bit 7).
 - Games for the youngest (`Pro nejmensi`): DOMCEKY, POSTARIK, ROBOTIK, SASKO, ZMRZLINY use the model 2 (their texts are in
   lower case, which the model 1 can not draw), the arrows are F1-F4 (K0-K3), Enter / F5 confirm, F12 is the menu, F6 is K5.

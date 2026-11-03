@@ -50,6 +50,11 @@ bytes the program reads from the tape.
 `TAPELOOP` in the note rewinds the tape of the game when the program reads past its end (the cassette is read from the
 start again). It is for programs that load data by name from their own tape: LEMMINGS (sectors) and TVARE (levels).
 
+`TAPEAUTOREWIND` in the note rewinds the tape of the game by itself when the program reads it to the end (and the saved
+tape of `TAPESAVE` too, if there is one): the order is the tape of the game, the saved tape, the tape of the game again.
+A program that looks for a file by its name can be used again after a wrong name without a restart (the search runs
+round the tape until [Stop], Ctrl). EVIDENCE uses it.
+
 EVIDENCE (Tomas Svec) asks for the maximal address (Enter), the date and the name of the file to load from the tape.
 The name has 8 characters: `ZAJ.CIN` and a space, `CLEN.ZAK`, `PROGRAMY`, ` SEZNAM ` (a space on both sides). [F11]
 switches to capital letters (it also types a stray character: press it before the name and clear the field). The tape

@@ -189,7 +189,7 @@ FFRUITS;1;MGLD 09;;;Enter = nova hra, Keypad + (RCL) = redefinice klaves, Ctrl (
 MAGICIAN;1;MGLD 0A;Left=O,Right=P,Up=Q,Down=A,Space=M;Q up:q,A down:a,O left:o,P right:p,M akce:m,1:1,2:2,3:3,4:4,Esc:Escape;v menu 1 = start, 2 obtiznost, 3 ovladani, 4 zvuk, hra: Q/A/O/P a M (pad: D-pad, A = M);P;
 FLAPPY2K;1;MGLD 0B;Up=E,Down=Z;E up:e,Y down:z,Left:Left,Right:Right,Space:Space,Enter:Return,G:g,P:p,S:s,Stop:Left Ctrl,Esc:Escape;menu G = hra (vyber sceny: sipky a Space), P = heslo, S = nastaveni, ve hre sipky = pohyb, Space = ohen, Stop (Ctrl) = zpet;P;FLAPPY
 KASWORD3;1;MGLD 00, JUMP 0000;;;textovy editor KASWORD 3 (nic se neuklada, jen klavesnice);;Programy
-EVIDENCE;1;MGLD 00, TAPESAVE;;;EVIDENCE: adresa a datum Enter, jmeno souboru na 8 znaku (ZAJ.CIN a mezera, CLEN.ZAK, PROGRAMY, SEZNAM s mezerou na zacatku i na konci), F11 = velka pismena, ulozeni M S C, jen klavesnice;;Programy
+EVIDENCE;1;MGLD 00, TAPESAVE, TAPEAUTOREWIND;;;EVIDENCE: adresa a datum Enter, jmeno souboru na 8 znaku (ZAJ.CIN a mezera, CLEN.ZAK, PROGRAMY, SEZNAM s mezerou na zacatku i na konci), F11 = velka pismena, ulozeni M S C, jen klavesnice;;Programy
 EVIDEDIT;1;MGLD 00, TAPESAVE EVIDENCE;;;EVIDEDIT: nazvy souboru a polozek, nova data pro EVIDENCE (ulozi se na magnetofon do saves/EVIDENCE), jen klavesnice;;Programy
 K-STUDIO;2;MGLD 01;;;graficky editor K-STUDIO (nic se neuklada, bez mysi);;Programy
 GR;2;MGLD 00;;;graficky editor GR (nic se neuklada, bez mysi);;Programy

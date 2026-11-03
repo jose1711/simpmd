@@ -231,6 +231,7 @@ void TAPInitialize ();
 void TAPSetSaveFile (const std::string &);
 void TAPSetLoopFile (const std::string &);
 void TAPSetSignal (bool);
+void TAPSetAutoRewind (const std::string &);
 void TAPKeyPressed ();
 void TAPShutdown ();
 Uint32 TAPLastRead ();

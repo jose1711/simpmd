@@ -132,6 +132,20 @@ void TAPKeyPressed ()
   bSaveRewind = true;
 }
 
+/// "TAPEAUTOREWIND" of the game: the tape of the game (with the share path), empty without the word.
+static std::string sRewindPath;
+static bool bAutoRewind = false;
+
+/** The tape of the game from its start (the cassette was rewound), true when it has data. */
+static bool TAPRewindGame ()
+{
+  if (oTapeInput.is_open ()) oTapeInput.close ();
+  oTapeInput.clear ();
+  oTapeInput.open (sRewindPath.c_str (), std::ios::binary);
+  bSaveStream = false;
+  return (oTapeInput.is_open () && oTapeInput.peek () != EOF);
+}
+
 /** Opens the saved tape from its start, true when it has data. */
 static bool TAPOpenSaved ()
 {
@@ -168,6 +182,13 @@ bool TAPInputFileStatus ()
       // looks for the name once, a cassette comes to its end).
       if (bSignalOn && bSaveStream)
         return (false);
+      // "TAPEAUTOREWIND": the saved tape is at its end too (or there is none): the tape of the game starts again.
+      if (bAutoRewind && bSaveStream)
+      {
+        if (!TAPRewindGame ())
+          return (false);
+        continue;
+      }
       // The tape of the game is read to its end: the saved tape follows, from its start (as a rewound cassette),
       // and again from the start when the program has read it all and asks for data once more. Looking for the
       // file is limited, the program polls the status very often.
@@ -176,7 +197,12 @@ bool TAPInputFileStatus ()
         return (false);
       iSaveTry = iNow;
       if (!TAPOpenSaved ())
+      {
+        // No saved tape, or it is empty: with "TAPEAUTOREWIND" the tape of the game starts again.
+        if (bAutoRewind && TAPRewindGame ())
+          continue;
         return (false);
+      }
       iSaveTry = 0;
       continue;
     }
@@ -411,6 +437,16 @@ void TAPSetSaveFile (const std::string &sPath)
 {
   sSavePath = sPath;
   iSaveTry = 0;
+}
+
+
+void TAPSetAutoRewind (const std::string &sPath)
+{
+  sRewindPath = sPath;
+  bAutoRewind = !sPath.empty ();
+  // Without a saved tape (no "TAPESAVE") the existing rewind of "TAPELOOP" does it.
+  if (bAutoRewind && sLoopPath.empty ())
+    sLoopPath = sPath;
 }
 
 

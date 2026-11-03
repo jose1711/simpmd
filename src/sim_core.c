@@ -403,7 +403,7 @@ static std::string ListNote (const std::string &sNote)
     iPos = iEnd + 1;
     while (!sPart.empty () && sPart [0] == ' ')
       sPart.erase (0, 1);
-    if (sPart == "FONT" || sPart == "NOBLINK" || sPart == "TAPESIGNAL" || sPart == "TAPELOOP" || sPart.compare (0, 8, "TAPESAVE") == 0 || sPart.compare (0, 7, "KEYHOLD") == 0)
+    if (sPart == "FONT" || sPart == "NOBLINK" || sPart == "TAPESIGNAL" || sPart == "TAPELOOP" || sPart == "TAPEAUTOREWIND" || sPart.compare (0, 8, "TAPESAVE") == 0 || sPart.compare (0, 7, "KEYHOLD") == 0)
       continue;
     if (sPart.compare (0, 4, "ROM ") == 0 || sPart.compare (0, 5, "TYPE ") == 0)
       bBasic = bBasic || sPart.find ("basic") != std::string::npos;
@@ -1160,6 +1160,8 @@ static void EmulationInitialize (const std::string &sTape, int iModel)
 
   // "TAPELOOP" in the note: the tape is rewound to its start when the program reads past its end.
   TAPSetLoopFile (GameHasCommand (sTape, "TAPELOOP") ? sTape : std::string ());
+  // "TAPEAUTOREWIND": at the end of the tape (and of the saved tape) it starts again from the beginning.
+  TAPSetAutoRewind (GameHasCommand (sTape, "TAPEAUTOREWIND") ? sTape : std::string ());
   TAPSetSignal (GameHasCommand (sTape, "TAPESIGNAL"));
 
   KeysStart (sTape);
