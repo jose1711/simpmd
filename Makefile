@@ -1,4 +1,4 @@
-.PHONY: all bin clean install-data
+.PHONY: all bin check clean install-data
 
 all: bin
 
@@ -7,6 +7,11 @@ bin:
 
 clean:
 	@$(MAKE) -C src clean
+	@$(MAKE) -C tests clean
+
+# Tests of the modules that can run without a display (see tests/)
+check:
+	@$(MAKE) -C tests check
 
 
 # Copies ROMs, font, logos, games.lst and tapes into one flat directory (PMD_SHARE, with a trailing slash)

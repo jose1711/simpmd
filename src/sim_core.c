@@ -36,6 +36,7 @@ limitations under the License.
 #include <fstream>
 #include <iterator>
 #include <map>
+#include <mutex>
 #include <set>
 
 //--------------------------------------------------------------------------
@@ -779,7 +780,7 @@ static std::string AutoloadKeys (const std::string &sNote)
 
 /** State for the web remote control, JSON: mode (menu, list or game), selected index, names of the games.
  */
-static std::string WebState ()
+static std::string WebStateBuild ()
 {
   std::string sState = std::string ("{\"mode\":\"") + (!inMenu ? "game" : inList ? "list" : "menu") + "\",\"typing\":" +
                        (iKeyPos < (int) sKeys.size () ? "true" : "false") + ",\"index\":" +
@@ -791,6 +792,24 @@ static std::string WebState ()
               oView [i] < 0 ? (CategoryIsFamily (oCategories [-oView [i] - 1]) ? CategoryLabel (oCategories [-oView [i] - 1]) + " >" :
                                "[ " + CategoryLabel (oCategories [-oView [i] - 1]) + " ]") : oGames [oView [i]].sTape) + "\"";
   return (sState + "]}");
+}
+
+
+/// The state for the web thread: built by the main thread (WebStatePublish), the web thread only copies it.
+static std::mutex oWebStateLock;
+static std::string sWebState = "{}";
+
+static void WebStatePublish ()
+{
+  std::string sState = WebStateBuild ();
+  std::lock_guard <std::mutex> oGuard (oWebStateLock);
+  sWebState.swap (sState);
+}
+
+static std::string WebState ()
+{
+  std::lock_guard <std::mutex> oGuard (oWebStateLock);
+  return (sWebState);
 }
 
 
@@ -1257,7 +1276,10 @@ int main (int iArgC, const char *apArgV [])
   // Remote control from a browser: PMD_WEB=<port>, PMD_WEB_TOKEN=<secret> is required in the URL (?t=<secret>).
   const char *pWeb = getenv ("PMD_WEB");
   if (pWeb)
+  {
+    WebStatePublish ();
     WEBInitialize (atoi (pWeb), getenv ("PMD_WEB_TOKEN"), WebState);
+  }
   const char *pScreenshot = getenv ("PMD_SCREENSHOT");
   const char *pScreenshotMs = getenv ("PMD_SCREENSHOT_MS");
   Uint32 iScreenshotTime = SDL_GetTicks () + (pScreenshotMs ? atoi (pScreenshotMs) : 3000);
@@ -1304,6 +1326,8 @@ int main (int iArgC, const char *apArgV [])
   while (!SIMQueryShutdown ())
   {
     SDL_WaitEvent (&sEvent);
+    // Whatever the event changes (also on "continue") is published for the web thread at the end of the pass.
+    struct WebPublisher { bool bOn; ~WebPublisher () { if (bOn) WebStatePublish (); } } oPublisher = { pWeb != NULL };
     if (pLog && sEvent.type != SDL_USEREVENT)
     {
       fprintf (pLog, "%u type=0x%x inMenu=%d focus=%p", SDL_GetTicks (), sEvent.type, inMenu, (void *) SDL_GetKeyboardFocus ());

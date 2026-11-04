@@ -150,7 +150,8 @@ static bool TAPRewindGame ()
 static bool TAPOpenSaved ()
 {
   // What the program has written must be in the file before it is read.
-  if (oTapeOutput.is_open ()) oTapeOutput.flush ();
+  // The output is closed: the next save starts a new file (a save replaces the old tape, it is not appended).
+  if (oTapeOutput.is_open ()) oTapeOutput.close ();
   if (oTapeInput.is_open ()) oTapeInput.close ();
   oTapeInput.clear ();
   oTapeInput.open (sSavePath.c_str (), std::ios::binary);
@@ -403,9 +404,17 @@ void TAPWriteData (byte bData)
           mkdir (sSavePath.substr (0, iPos).c_str (), 0755);  // all levels, like mkdir -p
       oTapeOutput.clear ();
       oTapeOutput.open (sSavePath.c_str (), std::ios::binary | std::ios::trunc);
+      // The saved tape being read is the old one: the next Load opens the new file from its start.
+      if (bSaveStream && oTapeInput.is_open ())
+        oTapeInput.close ();
     }
     if (oTapeOutput.is_open () || !oArgTapeOutputs.empty ())
+    {
       oTapeOutput.put (bData);
+      // A tape runs at 240 bytes/s: flushing every byte is cheap and the save survives a power off of the Pi.
+      if (!sSavePath.empty ())
+        oTapeOutput.flush ();
+    }
   }
 }
 
@@ -437,6 +446,10 @@ void TAPSetSaveFile (const std::string &sPath)
 {
   sSavePath = sPath;
   iSaveTry = 0;
+  // Nothing of the previous game stays: its saved tape is not the input, its output file is not written any more.
+  bSaveStream = false;
+  bSaveRewind = false;
+  if (oTapeOutput.is_open ()) oTapeOutput.close ();
 }
 
 

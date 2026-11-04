@@ -5,3 +5,4 @@
 !/bin/mem2raw
 !/bin/ptp2raw
 !/bin/rawinfo
+tests/tape_test

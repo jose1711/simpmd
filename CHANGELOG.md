@@ -6,6 +6,10 @@ The version numbers are not used; the dates are the dates of the work in the
 
 ## 2026-11-04
 
+- Tape: a second save replaces the saved tape (it was appended to the first one), the saved tape is flushed after each byte,
+  and a new game does not inherit the saved tape of the previous one (its "read the saved tape" flags and its open output file).
+- Web remote: the state for the browser is built by the main thread and only copied by the web thread (a data race on the
+  game list state, found with ThreadSanitizer).
 - Games list: every game is in a category now (the main list has 12 rows instead of about 85). New categories `Plosinovky`,
   `Arkady`, `Strielacky`, `Logicke hry`, the families moved into them (`Plosinovky/MANIC`, ...), `Programy` split into `Grafika`,
   `Texty`, `Databaza`, `Hudba`; MICRHYTM is a program (`Programy/Hudba`), ON-DUCH4 is in the family `Plosinovky/PAMPUCH`.
