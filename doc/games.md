@@ -65,7 +65,7 @@ To add a game, copy its tape to the share directory and add a line to `games.lst
 
 ### BASIC games and the ROM module
 
-The BASIC games (no category, they show `BASIC-G` in the list) run in BASIC-G V2.0, which the PMD 85 has in a ROM module. The emulator has the
+The BASIC games (they are in the categories of their genre and show `BASIC-G` in the list) run in BASIC-G V2.0, which the PMD 85 has in a ROM module. The emulator has the
 module: an 8255 at the ports `0x88`-`0x8B` (the address goes to ports B and C, the byte comes from port A), a 32 KB ROM
 pack. The note of `games.lst` describes the game:
 
@@ -264,13 +264,18 @@ NAME;MODEL;NOTE[;REMAP[;PAD[;KEYS[;INPUT[;CATEGORY]]]]]
 
 ### `CATEGORY`
 
-The games list shows the categories first, as rows `[ Name ] (number of games)`, then the games without a category.
+The games list shows the categories first, as rows `[ Name ] (number of games)`, then the games without a category (now there
+are none: every game is in a category).
 [Enter] opens a category, its first row `(o uroven vys)` (or a held [Esc]) goes back to the main list. A category exists
 as soon as a game names it (the order is the order of the first game in the list); the name is shown as it is
 written, without diacritics. The columns before it must be there, empty if needed (`ZMRZLINY;2;MGLD 00;;;;;Pro nejmensi`).
 The order of the categories is the order of the first game of each, or fixed by lines `#CATEGORY Name` in the head of
-`games.lst`. The web remote control gets the same rows. Now: `Pro nejmensi` (DOMCEKY, POSTARIK, ROBOTIK, ZMRZLINY, SASKO), `Dema`
-(FERLAJT, KANKAN), `Programovani`, `Deskove hry`, `2 hraci` and the families below.
+`games.lst`. The web remote control gets the same rows. Now: `Pro nejmensi` (DOMCEKY, POSTARIK, ROBOTIK, ZMRZLINY, SASKO),
+`Plosinovky` (platform and adventure action games: MANIC, WILLY, FRED, MYTH, MTRON, PAMPUCH, DIZZY, JETPAC, ...), `Arkady`
+(ARKANOID, BOULDER, VLAK, GLUTTON, ...), `Strielacky` (GALAXIA, INVADERS, PENETR, ...), `Logicke hry` (FLAPPY, PONTRIS, KVADRO,
+TETRIS, ATOMIX, LEMMINGS, ...), `Dema`, `Programovani`, `Programy` (the sub lists `Grafika`, `Texty`, `Databaza`, `Hudba`),
+`Naucne`, `Textove adventury`, `2 hraci` and `Deskove hry`. A game is in the list of its genre; a program for the PMD 85 that
+is not a game goes to `Programy` or `Programovani`.
 
 A category can be inside another one: `Parent/Name` (e.g. `Programovani/KAREL`) is a sub list of `Programovani`; the parents
 are created by themselves, [Enter] opens it, `(o uroven vys)` or a held [Esc] goes one level up (the cursor on the row that
@@ -282,9 +287,11 @@ A line `#FAMILY Name` in the head of `games.lst` declares a category that is a f
 MANIC+, MANIC+2, MANIC-1, MANIC-2, MANIC23C). The versions name it in `CATEGORY`. Unlike the other categories, the row of a
 family is not at the top of the list, it stands among the games in alphabetical order, shown as the name with a filled
 triangle (`MANIC ▶`, the web remote control `MANIC >`) instead of the brackets and the count of a category. A family of a category
-has the name with its parent (`#FAMILY Programovani/KAREL`, the games of it `...;Programovani/KAREL`). Now: MANIC, FLAPPY,
-ARKANOID, BOULDER, PAMPUCH, PONTRIS, KVADRO, WILLY, GALAXIA, MTRON, MYTH, `Deskove hry/PEXESO`, `Deskove hry/REVERZ`, `Programovani/ZOFKA`,
-`Programovani/KAREL`, `Programovani/KAREL3D`. A family with one version is not needed, use the game itself.
+has the name with its parent (`#FAMILY Programovani/KAREL`, the games of it `...;Programovani/KAREL`). Now: `Plosinovky/MANIC`,
+`Plosinovky/WILLY`, `Plosinovky/FRED`, `Plosinovky/MYTH`, `Plosinovky/MTRON`, `Plosinovky/PAMPUCH` (with ON-DUCH4), `Arkady/ARKANOID`,
+`Arkady/BOULDER`, `Strielacky/GALAXIA`, `Logicke hry/FLAPPY`, `Logicke hry/PONTRIS`, `Logicke hry/KVADRO`, `Deskove hry/PEXESO`,
+`Deskove hry/REVERZ`, `Programovani/ZOFKA`, `Programovani/KAREL`, `Programovani/KAREL3D`, `Programovani/TINYBASIC`,
+`Programovani/DAM`, `Programovani/VMON`, `Programovani/MRAVEC`. A family with one version is not needed, use the game itself.
 
 ### PMD 85-2A (`MODEL` `2A`)
 

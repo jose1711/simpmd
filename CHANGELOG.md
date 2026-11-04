@@ -4,6 +4,12 @@ Changes since the original SDL 1 version (tag `sdl1-final`, the last upstream co
 The version numbers are not used; the dates are the dates of the work in the
 [pmd85console](https://github.com/jose1711/pmd85console) repository the code comes from.
 
+## 2026-11-04
+
+- Games list: every game is in a category now (the main list has 12 rows instead of about 85). New categories `Plosinovky`,
+  `Arkady`, `Strielacky`, `Logicke hry`, the families moved into them (`Plosinovky/MANIC`, ...), `Programy` split into `Grafika`,
+  `Texty`, `Databaza`, `Hudba`; MICRHYTM is a program (`Programy/Hudba`), ON-DUCH4 is in the family `Plosinovky/PAMPUCH`.
+
 ## 2026-11-03
 
 - New word `TAPEAUTOREWIND` in the note: the tape of the game starts again when it is read to its end (EVIDENCE: a wrong file name can be corrected without a restart).
