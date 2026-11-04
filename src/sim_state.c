@@ -1,4 +1,4 @@
-/** Saved state of the simulated machine (experimental).
+/** Saved state of the simulated machine.
  *
  *  A state is the processor registers, the output latches of the system 8255, the keyboard column latch,
  *  the processor clock and the 64k of memory. The tape position and the keys held on the host are not saved

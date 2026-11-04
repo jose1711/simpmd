@@ -16,7 +16,7 @@ The original SDL 1 version is kept under the tag `sdl1-final`.
 - Models PMD 85-1, 85-2 and 85-2A (all RAM mode, ROM switched off by port C), BASIC-G in a ROM module,
   Czech and Slovak letters of the PMD 85-3 for the BASIC programs.
 - Control by keyboard, gamepad, TV remote (HDMI-CEC) or a browser (`PMD_WEB`), per game key remapping (`REMAP`).
-- Saved state of a game (Alt/Ctrl + F5 save, F9 load), experimental.
+- Saved state of a game (Alt/Ctrl + F5 save, F9 load).
 - Sound with a DC blocker and a buffer lead, tape input and output, screenshots, test and debug variables (`PMD_*`).
 - About 175 tapes and games.lst entries: games, demos, programs, the BASIC programs, and two programs written for this emulator
   (`MPY85`, a subset of Python in 8080 assembly, and `DOOM85`, a raycaster). Sources:

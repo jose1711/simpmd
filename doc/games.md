@@ -237,7 +237,7 @@ Icons left of the name show what the game can be played with besides the keyboar
 |---|---|
 | gamepad | the buttons of a gamepad are enough, see [remote.md](remote.md#gamepad) |
 | TV remote | the TV remote control over HDMI-CEC is enough (cursor keys, OK, digits), see [remote.md](remote.md#tv-remote-control-hdmi-cec) |
-| disk | a saved state of the game exists (`states/<game>.sav`, see [usage.md](usage.md#saved-state-experimental)); shown in the list, on a category row when one of its games has one, and under the four games of the main menu |
+| disk | a saved state of the game exists (`states/<game>.sav`, see [usage.md](usage.md#saved-state)); shown in the list, on a category row when one of its games has one, and under the four games of the main menu |
 
 A game without icons is keyboard only (text adventures, games that need many action keys) or its controls are not
 known yet.
