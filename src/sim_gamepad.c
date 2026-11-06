@@ -299,6 +299,19 @@ void GPDInitialize ()
 /** Keys of the pad for the running game: "input=key,..." (the names of PMD_PAD), the rest is as without a game.
  *  Called when a game starts (REMAP "pad:lb=F2,pad:rb=F3" in games.lst) and with an empty text when it ends.
  */
+/** The key a pad input sends now (the defaults, PMD_PAD and the per-game override) and the name of the input, for the listing of
+ *  the controls. Returns SDLK_UNKNOWN for an input without a key.
+ */
+SDL_Keycode GPDInputKey (int iInput, const char **ppName)
+{
+  if (iInput < 0 || iInput >= PAD_COUNT)
+    return (SDLK_UNKNOWN);
+  if (ppName)
+    *ppName = apPadName [iInput];
+  return (aiPadKey [iInput]);
+}
+
+
 void GPDSetGameKeys (const std::string &sSpec)
 {
   for (int i = 0 ; i < PAD_COUNT ; i ++)

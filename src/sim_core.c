@@ -898,8 +898,21 @@ static void KeysRemap (const std::string &sTape)
       printf ("Ovladanie: %s\n", pGame->sHelp.c_str ());
     if (!sKeyboardRemap.empty ())
       printf ("Klavesy PMD (host=PMD): %s\n", sKeyboardRemap.c_str ());
-    if (!sPadKeys.empty ())
-      printf ("Gamepad: %s\n", sPadKeys.c_str ());
+    // The pad as it plays this game: each input, the key it sends and the PMD 85 key after the REMAP of the game.
+    std::string sPadList;
+    for (int iInput = 0 ; ; iInput ++)
+    {
+      const char *pName = NULL;
+      SDL_Keycode iKey = GPDInputKey (iInput, &pName);
+      if (!pName)
+        break;
+      if (iKey == SDLK_UNKNOWN)
+        continue;
+      std::map <SDL_Keycode, SDL_Keycode>::const_iterator xRemap = oRemap.find (iKey);
+      sPadList += std::string (sPadList.empty () ? "" : ", ") + pName + "=" + SDL_GetKeyName (xRemap != oRemap.end () ? xRemap->second : iKey);
+    }
+    if (!sPadList.empty ())
+      printf ("Gamepad (vstup=klaves PMD): %s\n", sPadList.c_str ());
     if (pGame->sInput.find ('P') != std::string::npos)
       printf ("Hra sa da hrat gamepadom.\n");
     fflush (stdout);

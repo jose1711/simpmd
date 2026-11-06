@@ -219,6 +219,7 @@ void GPDInitialize ();
 void GPDSetGameKeys (const std::string &);
 void GPDShutdown ();
 byte GPDJoystickByte ();
+SDL_Keycode GPDInputKey (int, const char **);
 void GPDEventHandler (const SDL_Event *);
 
 void SNDSynchronize ();
