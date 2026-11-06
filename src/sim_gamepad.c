@@ -216,6 +216,95 @@ static void GPDAxis (SDL_JoystickID iDevice, bool bVertical, Sint16 iValue)
 }
 
 
+
+/** Reads the current state of a game controller (buttons, D-pad, left stick, triggers) as the inputs and sets it, so a button that is
+ *  already held when the pad is opened (or when it is found again) is not lost and a resting pad is not taken as pressed.
+ */
+static void GPDSyncController (SDL_JoystickID iId, SDL_GameController *pController)
+{
+  static const SDL_GameControllerButton aeButton [] =
+  {
+    SDL_CONTROLLER_BUTTON_DPAD_UP, SDL_CONTROLLER_BUTTON_DPAD_DOWN, SDL_CONTROLLER_BUTTON_DPAD_LEFT, SDL_CONTROLLER_BUTTON_DPAD_RIGHT,
+    SDL_CONTROLLER_BUTTON_A, SDL_CONTROLLER_BUTTON_B, SDL_CONTROLLER_BUTTON_X, SDL_CONTROLLER_BUTTON_Y,
+    SDL_CONTROLLER_BUTTON_LEFTSHOULDER, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, SDL_CONTROLLER_BUTTON_BACK, SDL_CONTROLLER_BUTTON_START,
+    SDL_CONTROLLER_BUTTON_LEFTSTICK, SDL_CONTROLLER_BUTTON_RIGHTSTICK
+  };
+  Uint32 iButtons = 0;
+  for (size_t i = 0 ; i < sizeof (aeButton) / sizeof (aeButton [0]) ; i ++)
+  {
+    int iInput = GPDControllerButton (aeButton [i]);
+    if (iInput >= 0 && SDL_GameControllerGetButton (pController, aeButton [i]))
+      iButtons |= 1u << iInput;
+  }
+  if (SDL_GameControllerGetAxis (pController, SDL_CONTROLLER_AXIS_TRIGGERLEFT) > 8000)
+    iButtons |= 1u << PAD_LT;
+  if (SDL_GameControllerGetAxis (pController, SDL_CONTROLLER_AXIS_TRIGGERRIGHT) > 8000)
+    iButtons |= 1u << PAD_RT;
+  Uint32 iStick = 0;
+  int iX = SDL_GameControllerGetAxis (pController, SDL_CONTROLLER_AXIS_LEFTX);
+  int iY = SDL_GameControllerGetAxis (pController, SDL_CONTROLLER_AXIS_LEFTY);
+  if (iX < -PMD_PAD_DEADZONE) iStick |= 1u << PAD_LEFT;
+  if (iX > PMD_PAD_DEADZONE)  iStick |= 1u << PAD_RIGHT;
+  if (iY < -PMD_PAD_DEADZONE) iStick |= 1u << PAD_UP;
+  if (iY > PMD_PAD_DEADZONE)  iStick |= 1u << PAD_DOWN;
+  GPDSetState (iId, iButtons, iStick);
+}
+
+
+/** Opens a game controller by its device index, once. Returns true when it is open now (and was not before).
+ */
+static bool GPDOpenController (int iDevice, const char *pHow)
+{
+  SDL_JoystickID iId = SDL_JoystickGetDeviceInstanceID (iDevice);
+  if (iId < 0 || oControllers.count (iId))
+    return (false);
+  SDL_GameController *pController = SDL_GameControllerOpen (iDevice);
+  if (!pController)
+    return (false);
+  oControllers [iId] = pController;
+  GPDSyncController (iId, pController);
+  printf ("Gamepad: %s%s\n", SDL_GameControllerName (pController), pHow);
+  fflush (stdout);
+  return (true);
+}
+
+
+/** Opens a joystick without a controller mapping by its device index, once.
+ */
+static bool GPDOpenJoystick (int iDevice, const char *pHow)
+{
+  SDL_JoystickID iId = SDL_JoystickGetDeviceInstanceID (iDevice);
+  if (iId < 0 || oJoysticks.count (iId))
+    return (false);
+  SDL_Joystick *pJoystick = SDL_JoystickOpen (iDevice);
+  if (!pJoystick)
+    return (false);
+  oJoysticks [iId] = pJoystick;
+  printf ("Gamepad (no mapping): %s%s\n", SDL_JoystickName (pJoystick), pHow);
+  fflush (stdout);
+  return (true);
+}
+
+
+/** Looks for pads that were not reported by a device event (the event can be lost, e.g. the device appears while the service
+ *  starts at the boot): every 2 seconds the devices are listed and the ones that are not open are opened. Cheap, the list is short.
+ */
+static void GPDRescan ()
+{
+  static Uint32 iLast = 0;
+  Uint32 iNow = SDL_GetTicks ();
+  if (iNow - iLast < 2000)
+    return;
+  iLast = iNow;
+  for (int i = 0, iCount = SDL_NumJoysticks () ; i < iCount ; i ++)
+  {
+    if (SDL_IsGameController (i))
+      GPDOpenController (i, " (found by the rescan)");
+    else
+      GPDOpenJoystick (i, " (found by the rescan)");
+  }
+}
+
 /// Test pad: PMD_VIRTPAD=<file> attaches a virtual game controller inside this process (no other program sees it), the first two
 /// bytes of the file are the pressed buttons, bit n is SDL_CONTROLLER_BUTTON n (0 A, 1 B, 2 X, 3 Y, 4 Back, 6 Start, 9 LB, 10 RB,
 /// 11 up, 12 down, 13 left, 14 right). It goes the whole way a real pad does, which makes the pad testable without one.
@@ -252,7 +341,17 @@ void GPDInitialize ()
   {
     int iIndex = SDL_JoystickAttachVirtual (SDL_JOYSTICK_TYPE_GAMECONTROLLER, 6, 15, 0);
     if (iIndex >= 0)
+    {
       pVirtualPad = SDL_JoystickOpen (iIndex);
+      // PMD_VIRTPAD_AXES=<x>,<y> sets the left stick of the test pad (a pad that rests at -32767, for example).
+      const char *pAxes = getenv ("PMD_VIRTPAD_AXES");
+      int iX, iY;
+      if (pVirtualPad && pAxes && sscanf (pAxes, "%d,%d", &iX, &iY) == 2)
+      {
+        SDL_JoystickSetVirtualAxis (pVirtualPad, 0, (Sint16) iX);
+        SDL_JoystickSetVirtualAxis (pVirtualPad, 1, (Sint16) iY);
+      }
+    }
   }
   for (int i = 0 ; i < PAD_COUNT ; i ++)
     aiPadKey [i] = aiPadDefault [i];
@@ -354,6 +453,7 @@ void GPDShutdown ()
 void GPDEventHandler (const SDL_Event *pEvent)
 {
   GPDVirtualPoll ();
+  GPDRescan ();
   static const bool bTrace = getenv ("PMD_PADTRACE") != NULL;
   if (bTrace && pEvent->type >= SDL_JOYAXISMOTION && pEvent->type <= SDL_CONTROLLERDEVICEREMAPPED)
   {
@@ -371,13 +471,10 @@ void GPDEventHandler (const SDL_Event *pEvent)
   {
     case SDL_CONTROLLERDEVICEADDED:
     {
-      SDL_GameController *pController = SDL_GameControllerOpen (pEvent->cdevice.which);
-      if (pController)
-      {
-        SDL_JoystickID iId = SDL_JoystickInstanceID (SDL_GameControllerGetJoystick (pController));
-        oControllers [iId] = pController;
-        printf ("Gamepad: %s\n", SDL_GameControllerName (pController));
-      }
+      // Debug: PMD_PADSKIPADDED=1 ignores the device events, so the rescan can be tested.
+      static const bool bSkip = getenv ("PMD_PADSKIPADDED") != NULL;
+      if (!bSkip)
+        GPDOpenController (pEvent->cdevice.which, "");
       break;
     }
     case SDL_CONTROLLERDEVICEREMOVED:
@@ -387,6 +484,8 @@ void GPDEventHandler (const SDL_Event *pEvent)
       {
         GPDSetState (xDevice->first, 0, 0);
         oDeviceState.erase (xDevice->first);
+        printf ("Gamepad removed: %s\n", SDL_GameControllerName (xDevice->second));
+        fflush (stdout);
         SDL_GameControllerClose (xDevice->second);
         oControllers.erase (xDevice);
       }
@@ -419,14 +518,9 @@ void GPDEventHandler (const SDL_Event *pEvent)
     // Joysticks without a controller mapping: hat as the D-pad, axes 0 and 1 as the stick.
     case SDL_JOYDEVICEADDED:
     {
-      if (SDL_IsGameController (pEvent->jdevice.which))
-        break;
-      SDL_Joystick *pJoystick = SDL_JoystickOpen (pEvent->jdevice.which);
-      if (pJoystick)
-      {
-        oJoysticks [SDL_JoystickInstanceID (pJoystick)] = pJoystick;
-        printf ("Gamepad (no mapping): %s\n", SDL_JoystickName (pJoystick));
-      }
+      static const bool bSkip = getenv ("PMD_PADSKIPADDED") != NULL;
+      if (!bSkip && !SDL_IsGameController (pEvent->jdevice.which))
+        GPDOpenJoystick (pEvent->jdevice.which, "");
       break;
     }
     case SDL_JOYDEVICEREMOVED:

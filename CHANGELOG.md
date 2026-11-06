@@ -9,6 +9,7 @@ The version numbers are not used; the dates are the dates of the work in the
 - Joystick: the 8255 at the ports `0x4C`/`0x4D` is read as a joystick (cursor keys + Space, or the gamepad D-pad/stick + A),
   so the games with the joystick option (JETPAC "Joystick B", ...) can be played with it. See `doc/keyboard.md`.
 - [Tab] is RCL too (for the keyboards without a numeric keypad).
+- Gamepad: the devices are listed every 2 seconds and a pad that was not reported by a device event is opened (the event can be lost, e.g. at the boot); the state of a pad is read when it is opened; a removed pad is reported in the terminal.
 - Game start prints the controls (KEYS, key remap, gamepad keys) to the terminal; `PMD_IOTRACE=1` logs the unknown I/O ports.
 
 ## 2026-11-04
