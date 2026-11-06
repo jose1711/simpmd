@@ -89,6 +89,7 @@ SDL_VIDEODRIVER=dummy SDL_RENDER_DRIVER=software SDL_AUDIODRIVER=disk bin/simpmd
 | `PMD_PAINTSTATS=1` | Debug: every 10 s the number of paint calls, painted frames, the slowest paint and the longest gap between paints (stderr). |
 | `PMD_PAINTTRACE=1` | Debug: the position of the leftmost lit pixel in lines 206-215 at each painted frame. |
 | `PMD_PADDLETRACE=1` | Debug: ARKANOID paddle sampler (2 ms): edge, `x`, speed, ball x, key bits and carry of the speed routine. |
+| `PMD_VIRTPAD=<file>` | Debug: attaches a virtual game controller inside the process (no other program sees it) and takes the pressed buttons from the first two bytes of the file, bit n = SDL controller button n (0 A, 1 B, 2 X, 3 Y, 4 Back, 6 Start, 9 LB, 10 RB, 11 up, 12 down, 13 left, 14 right). Tests the whole pad path without a pad. |
 | `PMD_PADTRACE=1` | Debug: prints the events of the gamepad (buttons, axes) and the pad inputs the emulator derived from them. |
 | `PMD_JOYFILE=<file>` | Debug: the first byte of the file is ANDed into the joystick (a low bit is a pressed input: 0 down, 1 up, 2 right, 3 left, 4 fire), so a test script can drive the joystick without the keyboard. |
 | `PMD_IOTRACE=1` | Debug: the first read or write of every I/O port the emulator does not know (port, value, address of the instruction), and the first read of the joystick ports. |

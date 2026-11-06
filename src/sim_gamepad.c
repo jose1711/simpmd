@@ -216,10 +216,44 @@ static void GPDAxis (SDL_JoystickID iDevice, bool bVertical, Sint16 iValue)
 }
 
 
+/// Test pad: PMD_VIRTPAD=<file> attaches a virtual game controller inside this process (no other program sees it), the first two
+/// bytes of the file are the pressed buttons, bit n is SDL_CONTROLLER_BUTTON n (0 A, 1 B, 2 X, 3 Y, 4 Back, 6 Start, 9 LB, 10 RB,
+/// 11 up, 12 down, 13 left, 14 right). It goes the whole way a real pad does, which makes the pad testable without one.
+static SDL_Joystick *pVirtualPad = NULL;
+static const char *pVirtualPadFile = NULL;
+
+static void GPDVirtualPoll ()
+{
+  static Uint32 iLast = 0;
+  Uint32 iNow = SDL_GetTicks ();
+  if (!pVirtualPad || iNow - iLast < 10)
+    return;
+  iLast = iNow;
+  FILE *pStream = fopen (pVirtualPadFile, "rb");
+  if (!pStream)
+    return;
+  int iLow = fgetc (pStream);
+  int iHigh = fgetc (pStream);
+  fclose (pStream);
+  if (iLow == EOF || iHigh == EOF)
+    return;
+  int iMask = iLow | (iHigh << 8);
+  for (int i = 0 ; i < 15 ; i ++)
+    SDL_JoystickSetVirtualButton (pVirtualPad, i, (iMask >> i) & 1);
+}
+
+
 void GPDInitialize ()
 {
   SDL_SetHint (SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
   SDL_InitSubSystem (SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER);
+  pVirtualPadFile = getenv ("PMD_VIRTPAD");
+  if (pVirtualPadFile)
+  {
+    int iIndex = SDL_JoystickAttachVirtual (SDL_JOYSTICK_TYPE_GAMECONTROLLER, 6, 15, 0);
+    if (iIndex >= 0)
+      pVirtualPad = SDL_JoystickOpen (iIndex);
+  }
   for (int i = 0 ; i < PAD_COUNT ; i ++)
     aiPadKey [i] = aiPadDefault [i];
   // PMD_PAD=<input>=<key>,... overrides the keys, for example PMD_PAD='a=Space,b=Return,x=H,back=Escape'.
@@ -306,6 +340,7 @@ void GPDShutdown ()
 
 void GPDEventHandler (const SDL_Event *pEvent)
 {
+  GPDVirtualPoll ();
   static const bool bTrace = getenv ("PMD_PADTRACE") != NULL;
   if (bTrace && pEvent->type >= SDL_JOYAXISMOTION && pEvent->type <= SDL_CONTROLLERDEVICEREMAPPED)
   {
