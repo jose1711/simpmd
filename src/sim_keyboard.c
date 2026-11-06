@@ -267,6 +267,7 @@ void KBDInitialize ()
     { SDLK_INSERT,              1, 13 },                // WRK
     { SDLK_DELETE,              1, 14 },                // CD
     { SDLK_KP_PLUS,             1, 15 },                // RCL
+    { SDLK_TAB,                 1, 15 },                // RCL as well, for the keyboards without the numeric keypad
     // Row 2
     { SDLK_1,                   2, 1 },                 // 1
     { SDLK_2,                   2, 2 },                 // 2

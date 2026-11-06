@@ -17,7 +17,7 @@ PC keys are mapped by SDL key code (the meaning of the key, not its position). T
 |---|---|
 | [Y] | Z (the PMD 85 has QWERTZ, so [Z] is on the PC [Y] and the PC [Z] is Y) |
 | [F1]-[F12] | K0-K11 |
-| [Insert], [Delete], Numpad [+] | WRK, CD, RCL |
+| [Insert], [Delete], Numpad [+] or [Tab] | WRK, CD, RCL |
 | [Home], [Up], [PageUp] | INS, DEL, CLR |
 | [Left] or [Backspace], [Right], Numpad [5] | LEFT, RIGHT, HOME |
 | [Down] | END |
@@ -52,7 +52,7 @@ key without and with [Shift]). The key caps are those of a PMD 85-2, see
 | [Left] or [Backspace], Numpad [5], [Right] | `<-`, `HOME` (arrow up left), `->` | | |
 | [Home], [Up], [PageUp] | `PTL INS`, `DEL`, `CLR` | | |
 | [End], [Down], [PageDown] | `\|<-`, `END`, `->\|` | | |
-| [Insert], [Delete], Numpad [+] | `WRK`, `C-D`, `RCL` | | |
+| [Insert], [Delete], Numpad [+] or [Tab] | `WRK`, `C-D`, `RCL` | | |
 | [F1] ... [F12] | `K0` ... `K11` | | |
 | [Enter] | `EOL` | | |
 | [Shift] (either) | red up arrow key = Shift | | |
@@ -73,7 +73,7 @@ Only what is documented; the keys are also in the manuals of the PMD 85, not in 
 - **[STOP]** (Ctrl here) interrupts a running tape operation, e.g. recording to tape (not on the PMD 85-1).
 - **[Shift]+[RCL]** switches from BASIC to the monitor (PMD 85-2, 2A, 3).
 - **[Shift]+[DEL]** starts a program loaded at 0000h (PMD 85-1).
-  GPMD85emu uses [Shift]+[PageUp] and [Shift]+[Delete] for these two, here they are [Shift]+Numpad [+] and
+  GPMD85emu uses [Shift]+[PageUp] and [Shift]+[Delete] for these two, here they are [Shift]+Numpad [+] (or [Shift]+[Tab]) and
   [Shift]+[Delete].
 - **[K0]-[K11]** are function keys without a fixed meaning, the program decides (e.g. [F1] is a menu key in MANIC,
   [RCL] and [F12] are buttons of SASKO, DOMCEKY and ROBOTIK).
