@@ -41,7 +41,7 @@
 # in the list (the commands to type), REMAP maps host keys to the PMD 85 keys a game reads (SDL key names,
 # e.g. Left=Left Shift,Right=V: AUTO and ZED steer with [Shift] and [V]). PAD lists the buttons of the web remote
 # control for the game, Label:key,... (SDL key names, key&key presses two at once), the default set is used without it. Generated from simpmd/data/tapes and the table in simpmd/README.
-ADC;2;ROM basic2.rmm, FONT, TYPE LOAD 1, TYPE RUN;Left=F10,Right=F12,E=F8,Z=F11,Up=F8,Down=F11,Space=F1,Left Shift=F2;Left:F10,Right:F12,Up:F8,Down:F11,K0:F1,K1:F2,Esc:Escape;pohyb: F10 vlevo, F12 vpravo, F8 nahoru, F11 dolu, F1 akce (pad: D-pad, A = F1, LB = F2, B = Enter);P;Plosinovky
+ADC;2;ROM basic2.rmm, FONT, TYPE LOAD 1, TYPE RUN;Left=F10,Right=F12,E=F8,Z=F11,Up=F8,Down=F11,Space=F1;Left:F10,Right:F12,Up:F8,Down:F11,K0:F1,Esc:Escape;pohyb: F10 vlevo, F12 vpravo, F8 nahoru, F11 dolu, F1 akce (pad: D-pad, A = F1);P;Plosinovky
 AIRRAID;1;MGLD 00, JUMP 1000;;;Air Raid (Nitra 1987): R hra, S strelba, sipky vlevo/vpravo;;Strielacky
 AUTO;1;MGLD 00, JUMP 2000;Left=Left Shift,Right=V;Left:Left,Right:Right,Shift:Left Shift,Esc:Escape;Shift = vlevo, V = vpravo;PR;Arkady
 BARBAR;2;ROM basic2.rmm, FONT, TYPE LOAD 1, TYPE RUN;Left=F10,Right=F12,E=F8,Z=F11,Up=F8,Down=F11,Space=F1,Left Shift=F2;Left:F10,Right:F12,Up:F8,Down:F11,K0:F1,K1:F2,Esc:Escape;pohyb: F10 vlevo, F12 vpravo, F8 nahoru, F11 dolu, F1 mec, F2 pouzij (pad: D-pad, A = F1, LB = F2, B = Enter);P;Plosinovky
