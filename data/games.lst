@@ -180,7 +180,7 @@ ZOFKA2;2;ROM basic2.rmm, FONT, TYPE LOAD 10, TYPE RUN;;;korytnacka Zofka (Logo):
 ZOFKA2-STARA;2;ROM basic2.rmm, FONT, TYPE LOAD 12, TYPE RUN;;;starsi verze Zofky: prikazy z klavesnice, potvrzeni Enter;;Programovani/ZOFKA
 ZOFKA2T;2;ROM basic2.rmm, FONT, TYPE LOAD 11, TYPE RUN;;;Zofka s prikazem pro tisk: prikazy z klavesnice, potvrzeni Enter;;Programovani/ZOFKA
 ZOFKA3;2;MGLD 00, JUMP 0003;;;korytnacka Zofka v strojovem kodu (verze 2.2): prikazy z klavesnice, potvrzeni Enter;;Programovani/ZOFKA
-DIZZY;2;MGLD 00, SHIFT, NOBLINK;Space=Left Shift;Left:Left,Right:Right,Space jump:Space,Enter action:Return,Esc:Escape;Magicland Dizzy (PMD 85-2A/3, cb verze bez hudby): sipky = pohyb, Shift = skok/start, Enter = akce/zvednout (pad: A skok, B akce);P;Plosinovky
+DIZZY;2;MGLD 00, SHIFT, NOBLINK;Space=Left Shift,E=Return,pad:up=Up;Left:Left,Right:Right,Space jump:Space,E action:e,Esc:Escape;Magicland Dizzy (PMD 85-2A/3, cb verze bez hudby): sipky = pohyb, mezernik = skok/start, E = akce/zvednout;P;Plosinovky
 DIKTATOR;2A;MGLD 00, JUMP 0000;;;Diktator (Don Priestley, DK Tronics 1983, preklad Frantisek Fuka, port ZX Spectrum hry pro PMD 85-2A a 3 s ColorACE): uvod trva asi minutu, pak libovolna klavesa, dale klavesnice, ColorACE (barvy) neni emulovan;;Logicke hry
 JETPAC;1;MGLD 01;;;Jetpac: v menu 3 = klavesnice, 5 = start, 7 = nastaveni klaves;;Plosinovky
 PSSST;1;MGLD 02;;;Pssst: v menu 3 = klavesnice, 5 = start, 7 = nastaveni klaves;;Plosinovky
