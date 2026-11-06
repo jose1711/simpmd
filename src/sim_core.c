@@ -33,6 +33,7 @@ limitations under the License.
 #include "sim_common.h"
 #include <algorithm>
 #include <unistd.h>
+#include <strings.h>
 #include <fstream>
 #include <iterator>
 #include <map>
@@ -1304,7 +1305,18 @@ int main (int iArgC, const char *apArgV [])
   iKeyMs = pKeyMs ? atoi (pKeyMs) : 100;
   const char *pAutostart = getenv ("PMD_AUTOSTART");
   const char *pGame = getenv ("PMD_GAME");
+  // simpmd <GAME> starts a game of the games list by its name (the same as PMD_GAME=<GAME>), simpmd --list prints the names.
+  bool bList = iArgC > 1 && (strcmp (apArgV [1], "--list") == 0 || strcmp (apArgV [1], "-l") == 0);
+  if (iArgC > 1 && apArgV [1][0] != '-')
+    pGame = apArgV [1];
   GamesLoad ();
+  if (bList)
+  {
+    for (size_t i = 0 ; i < oGames.size () ; i ++)
+      printf ("%s\n", oGames [i].sTape.c_str ());
+    SDL_Quit ();
+    return (0);
+  }
   // Remote control from a browser: PMD_WEB=<port>, PMD_WEB_TOKEN=<secret> is required in the URL (?t=<secret>).
   const char *pWeb = getenv ("PMD_WEB");
   if (pWeb)
@@ -1325,11 +1337,15 @@ int main (int iArgC, const char *apArgV [])
   {
     // Test mode: PMD_GAME=<name> starts a game of the games list.
     size_t iFound = 0;
-    while (iFound < oGames.size () && oGames [iFound].sTape != pGame)
+    while (iFound < oGames.size () && strcasecmp (oGames [iFound].sTape.c_str (), pGame) != 0)
       iFound ++;
     if (iFound == oGames.size ())
     {
-      fprintf (stderr, "PMD_GAME: '%s' is not in games.lst\n", pGame);
+      fprintf (stderr, "'%s' is not in games.lst (simpmd --list prints the names)\n", pGame);
+      // names that start with the same letters
+      for (size_t i = 0 ; i < oGames.size () ; i ++)
+        if (strncasecmp (oGames [i].sTape.c_str (), pGame, 3) == 0)
+          fprintf (stderr, "  maybe %s\n", oGames [i].sTape.c_str ());
       SDL_Quit ();
       return (1);
     }

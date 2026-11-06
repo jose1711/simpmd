@@ -22,7 +22,8 @@ Skip the logo and the menu and start a game directly, optionally typing keys:
 PMD_AUTOSTART=0 bin/simpmd
 
 # Start any game of games.lst
-PMD_GAME=BLUDISTE bin/simpmd
+bin/simpmd BLUDISTE          # a game by its name (case does not matter), `bin/simpmd --list` prints the names
+PMD_GAME=BLUDISTE bin/simpmd  # the same with an environment variable
 
 # Start and load a game with no keyboard needed (tested examples)
 PMD_AUTOSTART=0 PMD_KEYS='MGLD 03|____H__ ____' bin/simpmd   # FLAPPY: load, [H] play, [Space] skip controls
