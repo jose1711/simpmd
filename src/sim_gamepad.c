@@ -131,6 +131,16 @@ static void GPDSetState (SDL_JoystickID iDevice, Uint32 iButtons, Uint32 iStick)
   for (std::map <SDL_JoystickID, tDeviceState>::iterator xDevice = oDeviceState.begin () ; xDevice != oDeviceState.end () ; xDevice ++)
     iNewAll |= xDevice->second.iButtons | xDevice->second.iStick;
   iPadState = iNewAll;
+  static const bool bTrace = getenv ("PMD_PADTRACE") != NULL;
+  if (bTrace && iOldAll != iNewAll)
+  {
+    printf ("PAD inputs:");
+    for (int i = 0 ; i < PAD_COUNT ; i ++)
+      if (iNewAll & (1u << i))
+        printf (" %s", apPadName [i]);
+    printf ("%s\n", iNewAll ? "" : " (none)");
+    fflush (stdout);
+  }
   for (int i = 0 ; i < PAD_COUNT ; i ++)
   {
     Uint32 iMask = 1u << i;
@@ -296,6 +306,19 @@ void GPDShutdown ()
 
 void GPDEventHandler (const SDL_Event *pEvent)
 {
+  static const bool bTrace = getenv ("PMD_PADTRACE") != NULL;
+  if (bTrace && pEvent->type >= SDL_JOYAXISMOTION && pEvent->type <= SDL_CONTROLLERDEVICEREMAPPED)
+  {
+    if (pEvent->type == SDL_CONTROLLERBUTTONDOWN || pEvent->type == SDL_CONTROLLERBUTTONUP)
+      printf ("PAD event: button %d %s\n", pEvent->cbutton.button, pEvent->type == SDL_CONTROLLERBUTTONDOWN ? "down" : "up");
+    else if (pEvent->type == SDL_CONTROLLERAXISMOTION)
+      printf ("PAD event: axis %d value %d\n", pEvent->caxis.axis, pEvent->caxis.value);
+    else if (pEvent->type == SDL_JOYBUTTONDOWN || pEvent->type == SDL_JOYBUTTONUP)
+      printf ("PAD event: raw joystick button %d %s\n", pEvent->jbutton.button, pEvent->type == SDL_JOYBUTTONDOWN ? "down" : "up");
+    else if (pEvent->type == SDL_JOYHATMOTION)
+      printf ("PAD event: raw hat %d value %d\n", pEvent->jhat.hat, pEvent->jhat.value);
+    fflush (stdout);
+  }
   switch (pEvent->type)
   {
     case SDL_CONTROLLERDEVICEADDED:
