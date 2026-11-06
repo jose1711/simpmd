@@ -824,6 +824,8 @@ static void KeysRemap (const std::string &sTape)
   iLongSerial ++;
   sPad = pPadGame;
   std::string sPadKeys;
+  std::string sKeyboardRemap;
+  const tGame *pGame = NULL;
   std::string sName = sTape;
   size_t iShare = strlen (PMD_SHARE);
   if (sName.compare (0, iShare, PMD_SHARE) == 0)
@@ -832,6 +834,7 @@ static void KeysRemap (const std::string &sTape)
   {
     if (oGames [i].sTape != sName)
       continue;
+    pGame = &oGames [i];
     if (!oGames [i].sPad.empty ())
       sPad = oGames [i].sPad;
     const std::string &sRemap = oGames [i].sRemap;
@@ -852,6 +855,7 @@ static void KeysRemap (const std::string &sTape)
       size_t iEqual = sPair.find ('=');
       if (iEqual == std::string::npos)
         continue;
+      sKeyboardRemap += (sKeyboardRemap.empty () ? "" : ", ") + sPair;
       SDL_Keycode iFrom = SDL_GetKeyFromName (sPair.substr (0, iEqual).c_str ());
       std::string sTo = sPair.substr (iEqual + 1);
       // "Short|Long[|Held]": a short press sends the first key, a long press the second one, the third is held while pressed
@@ -886,6 +890,20 @@ static void KeysRemap (const std::string &sTape)
     }
   }
   GPDSetGameKeys (sPadKeys);
+  // The controls of the game to the terminal (the KEYS column of games.lst), for the user who starts it from a shell
+  if (pGame)
+  {
+    printf ("== %s ==\n", sName.c_str ());
+    if (!pGame->sHelp.empty ())
+      printf ("Ovladanie: %s\n", pGame->sHelp.c_str ());
+    if (!sKeyboardRemap.empty ())
+      printf ("Klavesy PMD (host=PMD): %s\n", sKeyboardRemap.c_str ());
+    if (!sPadKeys.empty ())
+      printf ("Gamepad: %s\n", sPadKeys.c_str ());
+    if (pGame->sInput.find ('P') != std::string::npos)
+      printf ("Hra sa da hrat gamepadom.\n");
+    fflush (stdout);
+  }
 }
 
 
