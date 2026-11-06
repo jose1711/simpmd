@@ -1349,6 +1349,33 @@ static void RomModuleWrite (int iReg, byte iValue)
   }
 }
 
+/** Debug: PMD_JOYFILE=<file> ANDs the first byte of the file into the joystick (a low bit is a pressed input), so a test script
+ *  can drive the joystick without the keyboard. The file is read at most every 20 ms.
+ */
+static byte JoystickFileByte ()
+{
+  static const char *pFile = getenv ("PMD_JOYFILE");
+  static byte iValue = 0xFF;
+  static Uint32 iLast = 0;
+  if (!pFile)
+    return (0xFF);
+  Uint32 iNow = SDL_GetTicks ();
+  if (iNow - iLast >= 20)
+  {
+    iLast = iNow;
+    FILE *pStream = fopen (pFile, "rb");
+    if (pStream)
+    {
+      int iByte = fgetc (pStream);
+      if (iByte != EOF)
+        iValue = (byte) iByte;
+      fclose (pStream);
+    }
+  }
+  return (iValue);
+}
+
+
 void InstIN ()
 {
   CPU_LOG_INST_B (IN);
@@ -1380,7 +1407,13 @@ void InstIN ()
     // Joystick (8255 at 0x4C-0x4F, mode 0x92: the ports A and B are inputs, Jetpac "Joystick B" reads 0x4D): low bits are
     // pressed inputs. Both ports show the same joystick: the cursor keys with Space, and the gamepad with the button A.
     case 0x4C:
-    case 0x4D:  RegA = KBDJoystickByte () & GPDJoystickByte ();
+    case 0x4D:  RegA = KBDJoystickByte () & GPDJoystickByte () & JoystickFileByte ();
+                {
+                  static const bool bJoyTrace = getenv ("PMD_IOTRACE") != NULL;
+                  static std::set <int> oSeenJoy;
+                  if (bJoyTrace && oSeenJoy.insert (iPort).second)
+                    fprintf (stderr, "IN joystick port %02x pc %04x\n", iPort, (int) RegPC);
+                }
                 break;
     default:    RegA = 0xFF;
                 {
