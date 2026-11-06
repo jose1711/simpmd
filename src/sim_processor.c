@@ -26,6 +26,7 @@ limitations under the License.
 */
 
 #include "sim_common.h"
+#include <set>
 
 #include <semaphore.h>
 #include <unistd.h>
@@ -1376,7 +1377,18 @@ void InstIN ()
     // state of a machine without that module; the 0xFF of an unknown port would stop the game on its first sound.
     case 0x5D:  RegA = 0x00;
                 break;
+    // Joystick (8255 at 0x4C-0x4F, mode 0x92: the ports A and B are inputs, Jetpac "Joystick B" reads 0x4D): low bits are
+    // pressed inputs. Both ports show the same joystick: the cursor keys with Space, and the gamepad with the button A.
+    case 0x4C:
+    case 0x4D:  RegA = KBDJoystickByte () & GPDJoystickByte ();
+                break;
     default:    RegA = 0xFF;
+                {
+                  static const bool bIoTrace = getenv ("PMD_IOTRACE") != NULL;
+                  static std::set <int> oSeen;
+                  if (bIoTrace && oSeen.insert (iPort).second)
+                    fprintf (stderr, "IN unknown port %02x pc %04x\n", iPort, (int) RegPC);
+                }
                 break;
   }
   iProcessorClock += 10;
@@ -1396,6 +1408,12 @@ void InstOUT ()
       RomModuleWrite (iPort & 3, RegA);
     iProcessorClock += 10;
     return;
+  }
+  {
+    static const bool bIoTrace = getenv ("PMD_IOTRACE") != NULL;
+    static std::set <int> oSeenOut;
+    if (bIoTrace && iPort != 0x1E && iPort != 0xF4 && iPort != 0xF6 && iPort != 0xF7 && oSeenOut.insert (iPort).second)
+      fprintf (stderr, "OUT port %02x value %02x pc %04x\n", iPort, RegA, (int) RegPC);
   }
   switch (iPort)
   {

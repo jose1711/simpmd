@@ -66,7 +66,7 @@ static SDL_Keycode aiPadKey [PAD_COUNT];
 /// Keys without the per-game overrides (the defaults and PMD_PAD).
 static SDL_Keycode aiPadBase [PAD_COUNT];
 /// Pressed inputs, bit mask by tPadInput (all devices together).
-static Uint32 iPadState;
+static volatile Uint32 iPadState;
 /// Pressed inputs of a device, bit masks by tPadInput.
 struct tDeviceState
 {
@@ -99,6 +99,22 @@ static void GPDSendKey (SDL_Keycode iSym, bool bDown)
   sEvent.key.state = bDown ? SDL_PRESSED : SDL_RELEASED;
   sEvent.key.keysym.sym = iSym;
   SDL_PushEvent (&sEvent);
+}
+
+
+/** The state of the pad as the PMD 85 joystick (the 8255 ports 0x4C and 0x4D): a low bit is a pressed direction or the fire
+ *  button, 0xFF is no input. Bit 0 down (Jetpac: stop falling), 1 up, 2 right, 3 left, 4 fire (the pad button A).
+ */
+byte GPDJoystickByte ()
+{
+  Uint32 iState = iPadState;
+  byte iResult = 0xFF;
+  if (iState & (1u << PAD_DOWN))   iResult &= ~0x01;
+  if (iState & (1u << PAD_UP))     iResult &= ~0x02;
+  if (iState & (1u << PAD_RIGHT))  iResult &= ~0x04;
+  if (iState & (1u << PAD_LEFT))   iResult &= ~0x08;
+  if (iState & (1u << PAD_A))      iResult &= ~0x10;
+  return (iResult);
 }
 
 

@@ -195,9 +195,27 @@ static std::map <SDL_Keycode, Uint32> oPressTime;
 static std::map <SDL_Keycode, Uint32> oPendingRelease;
 
 
+/// The cursor keys and Space as the PMD 85 joystick, a low bit is a pressed key (see GPDJoystickByte for the bits).
+static volatile byte iJoystickKeys = 0xFF;
+
+byte KBDJoystickByte ()
+{
+  return (iJoystickKeys);
+}
+
+static void KBDJoystickKey (SDL_Keycode iSym, bool bPressed)
+{
+  byte iMask = iSym == SDLK_DOWN ? 0x01 : iSym == SDLK_UP ? 0x02 : iSym == SDLK_RIGHT ? 0x04 :
+               iSym == SDLK_LEFT ? 0x08 : iSym == SDLK_SPACE ? 0x10 : 0;
+  if (iMask)
+    iJoystickKeys = bPressed ? iJoystickKeys & ~iMask : iJoystickKeys | iMask;
+}
+
+
 void KBDEventHandler (const SDL_KeyboardEvent *pEvent)
 {
   SDL_Keycode iSym = pEvent->keysym.sym;
+  KBDJoystickKey (iSym, pEvent->state == SDL_PRESSED);
   Uint32 iNow = SDL_GetTicks ();
   switch (pEvent->state)
   {

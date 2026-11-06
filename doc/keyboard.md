@@ -82,3 +82,12 @@ Only what is documented; the keys are also in the manuals of the PMD 85, not in 
 - **Under CP/M** the keys produce control codes: [WRK] = Ctrl-K, [RCL] = Ctrl-W, [END] = Ctrl-C,
   [Shift]+[CLR] = Ctrl-A, [K0]-[K11] = Ctrl-A to Ctrl-L (full table: `Ctrl-CPM-PMD85.txt` of GPMD85emu).
 - The meaning of **[WRK]** and **[CD]** was not found in the sources available to the author; please add it if you know it.
+
+## Joystick
+
+The games that can be played with a joystick (JETPAC "Joystick B", KUBANOID "Joystick A", ...) read it from the 8255 at the ports
+`0x4C` (A) and `0x4D` (B). The emulated joystick is the cursor keys with Space as the fire button, or the gamepad
+(D-pad or the left stick, button A = fire). Both ports show the same joystick, so one player is enough for both "Joystick A" and
+"Joystick B". Bits of the port, a low bit is a pressed input: 0 down (JETPAC: stop falling), 1 up, 2 right, 3 left, 4 fire.
+Games that do not use a joystick do not read the ports, and with no input the ports read 0xFF.
+

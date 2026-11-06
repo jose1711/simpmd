@@ -195,6 +195,7 @@ byte KBDReadRow ();
 uint32 KBDScanCount ();
 uint32 KBDSeenCount ();
 byte KBDReadColumn ();
+byte KBDJoystickByte ();
 void KBDWriteColumn (byte iData);
 void KBDEventHandler (const SDL_KeyboardEvent *);
 void KBDSetHold (int iMs);
@@ -217,6 +218,7 @@ void WEBShutdown ();
 void GPDInitialize ();
 void GPDSetGameKeys (const std::string &);
 void GPDShutdown ();
+byte GPDJoystickByte ();
 void GPDEventHandler (const SDL_Event *);
 
 void SNDSynchronize ();
