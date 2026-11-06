@@ -63,8 +63,8 @@ ERB;2;ROM basic2.rmm, FONT, TYPE LOAD 1, TYPE RUN;Left=F10,Right=F12,E=F8,Z=F11,
 FARAON;2;ROM basic2.rmm, FONT, TYPE LOAD 3, TYPE RUN;;;P vpravo, L vlevo, H nahoru, D dolu, Enter, odpovedi A/N, jmeno z klavesnice;;Textove adventury
 FERLAJT;1;MGLD 13;Space=Return;Enter:Return,Esc:Escape;hudebni demo, staci Enter (TV: OK, pad: A, B nebo Start);PR;Dema
 FLAPPY;1;MGLD 03;Up=E,Down=Z;E up:e,Y down:z,Left:Left,Right:Right,Space:Space,Enter:Return,H:h,I:i,Shift:Left Shift,RCL:Keypad +,Stop:Left Ctrl,F1:F1,Esc:Escape;E/Y nahoru/dolu, Space = hod, F1 = konec, Stop (Ctrl) = reset, kody jen klavesnici;;Logicke hry/FLAPPY
-FRED;2;MGLD 03;;E up:e,Y down:z,Left:Left,Right:Right,Space:Space,H:h,RCL:Keypad +,Esc:Escape;H start hry, RCL rychlost ptaku, sipky vlevo/vpravo, E/Y, Space start (pad: X = H, RB = RCL, A = Space);P;Plosinovky/FRED
-FRED-4;1;MGLD 03;;E up:e,Y down:z,Left:Left,Right:Right,Space:Space,H:h,RCL:Keypad +,Esc:Escape;H start hry, RCL rychlost ptaku, sipky vlevo/vpravo, E/Y, Space start (pad: X = H, RB = RCL, A = Space) (verze +4 pro oba typy PMD, VBG software 1988);P;Plosinovky/FRED
+FRED;2;MGLD 03;Up=E,Down=Z;E up:e,Y down:z,Left:Left,Right:Right,Space:Space,H:h,RCL:Keypad +,Esc:Escape;H start hry, RCL rychlost ptaku, sipky vlevo/vpravo, E/Y nebo sipky nahoru/dolu, Space start (pad: X = H, RB = RCL, A = Space);P;Plosinovky/FRED
+FRED-4;1;MGLD 03;Up=E,Down=Z;E up:e,Y down:z,Left:Left,Right:Right,Space:Space,H:h,RCL:Keypad +,Esc:Escape;H start hry, RCL rychlost ptaku, sipky vlevo/vpravo, E/Y nebo sipky nahoru/dolu, Space start (pad: X = H, RB = RCL, A = Space) (verze +4 pro oba typy PMD, VBG software 1988);P;Plosinovky/FRED
 GALAXIA;1;MGLD 00;;Space:Space,M:m,T:t,Z:y,S:s,Enter:Return,Backspace:Backspace,Esc:Escape;Space start, M/T/Z/S vyber, Enter potvrzeni, Backspace maze;;Strielacky/GALAXIA
 GALAXIA.A;1;;;;zdrojovy text hry GALAXIA v assembleru (typ A), neni spustitelny;;Strielacky/GALAXIA
 GARDNER;2;ROM basic2.rmm, FONT, TYPE LOAD 44, TYPE RUN;;;pismena radu a smeru z klavesnice, libovolna klavesa pokracuje;;Logicke hry
