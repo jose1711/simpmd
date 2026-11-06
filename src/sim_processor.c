@@ -1407,7 +1407,8 @@ void InstIN ()
     // Joystick (8255 at 0x4C-0x4F, mode 0x92: the ports A and B are inputs, Jetpac "Joystick B" reads 0x4D): low bits are
     // pressed inputs. Both ports show the same joystick: the cursor keys with Space, and the gamepad with the button A.
     case 0x4C:
-    case 0x4D:  RegA = KBDJoystickByte () & GPDJoystickByte () & JoystickFileByte ();
+    case 0x4D:  KBDJoystickPolled ();
+                RegA = KBDJoystickByte () & GPDJoystickByte () & JoystickFileByte ();
                 {
                   static const bool bJoyTrace = getenv ("PMD_IOTRACE") != NULL;
                   static std::set <int> oSeenJoy;

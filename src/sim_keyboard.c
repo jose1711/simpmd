@@ -127,8 +127,27 @@ void KBDWriteColumn (byte iData)
  *
  *  @arg pEvent The event to handle.
  */
+/// Games with JOYONLY in the note: while the program polls the joystick, the keys that are the joystick (the cursor keys and Space,
+/// also the pad keys on them) do not go to the keyboard matrix, only to the joystick bits. JETSET WILLY takes Space on the keyboard
+/// for pause, so the fire button would pause the game when it is not held together with a direction.
+static volatile bool bJoystickOnly = false;
+static volatile Uint32 iJoystickRead = 0;
+
+void KBDSetJoystickOnly (bool bOn)
+{
+  bJoystickOnly = bOn;
+}
+
+void KBDJoystickPolled ()
+{
+  iJoystickRead = SDL_GetTicks () + 1;
+}
+
 static void KBDApply (SDL_Keycode iSym, Uint8 iState)
 {
+  if (iState == SDL_PRESSED && bJoystickOnly && iJoystickRead && SDL_GetTicks () - iJoystickRead < 150 &&
+      (iSym == SDLK_SPACE || iSym == SDLK_LEFT || iSym == SDLK_RIGHT || iSym == SDLK_UP || iSym == SDLK_DOWN))
+    return;                     // a release is always applied, so no key stays down
   // Find the location of the key in the key map
   tKeyMap::iterator xLocation = oKeyMap.find (iSym);
   if (xLocation != oKeyMap.end ())

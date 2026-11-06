@@ -196,6 +196,8 @@ uint32 KBDScanCount ();
 uint32 KBDSeenCount ();
 byte KBDReadColumn ();
 byte KBDJoystickByte ();
+void KBDSetJoystickOnly (bool);
+void KBDJoystickPolled ();
 void KBDWriteColumn (byte iData);
 void KBDEventHandler (const SDL_KeyboardEvent *);
 void KBDSetHold (int iMs);

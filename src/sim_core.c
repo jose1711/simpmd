@@ -941,6 +941,7 @@ static void KeysStart (const std::string &sTape)
         sKeys = AutoloadKeys (oGames [i].sNote);
   }
   KeysRemap (sTape);
+  KBDSetJoystickOnly (GameHasCommand (sTape, "JOYONLY"));
   iKeyPos = 0;
   bKeyDown = false;
   iKeyTime = SDL_GetTicks () + 1500;

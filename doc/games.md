@@ -27,6 +27,8 @@ routine when `39A4` is 0, so its note is `MGLD 00, JUMP 0000, POKE 39A4 01`.
 it at the start of the load and then runs in the monochrome mode (no blink and gray bits in the video memory); pressing
 it later does not help, the load takes 15 s with it.
 
+`JOYONLY` in the note: while the program polls the joystick (the ports `0x4C`/`0x4D`), the cursor keys and Space (and the pad inputs mapped to them) go only to the emulated joystick, not to the keyboard matrix. JSWILLY needs it: Space on the keyboard is its pause, so the joystick fire button paused the game when it was not held together with a direction.
+
 `NOBLINK` in the note ignores the blink bit of the video memory (bit 7) in the picture and in the web remote. Magicland
 Dizzy (for the PMD 85-2A/3) sets the bit on large areas, probably as a color that this emulator cannot show, and the
 picture would flash.
