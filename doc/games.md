@@ -27,6 +27,8 @@ routine when `39A4` is 0, so its note is `MGLD 00, JUMP 0000, POKE 39A4 01`.
 it at the start of the load and then runs in the monochrome mode (no blink and gray bits in the video memory); pressing
 it later does not help, the load takes 15 s with it.
 
+`NOJOY` in the note: the joystick ports always read 0xFF, the cursor keys, Space and the pad do not reach the program as a joystick. For a game that polls the joystick all the time, also when the keyboard is chosen (DIZZY, FRED, HORAC and MANIC-2 do), and takes the same key twice (as the joystick and as the keyboard). No game has it now: DIZZY gave the same result with and without it, the others were not compared.
+
 `JOYONLY` in the note: while the program polls the joystick (the ports `0x4C`/`0x4D`), the cursor keys and Space (and the pad inputs mapped to them) go only to the emulated joystick, not to the keyboard matrix. JSWILLY needs it: Space on the keyboard is its pause, so the joystick fire button paused the game when it was not held together with a direction.
 
 `NOBLINK` in the note ignores the blink bit of the video memory (bit 7) in the picture and in the web remote. Magicland
