@@ -21,6 +21,7 @@ limitations under the License.
 
 #include "sim_common.h"
 
+#include <atomic>
 #include <map>
 #include <string>
 #include <string.h>
@@ -66,7 +67,7 @@ static SDL_Keycode aiPadKey [PAD_COUNT];
 /// Keys without the per-game overrides (the defaults and PMD_PAD).
 static SDL_Keycode aiPadBase [PAD_COUNT];
 /// Pressed inputs, bit mask by tPadInput (all devices together).
-static volatile Uint32 iPadState;
+static std::atomic <Uint32> iPadState (0);
 /// Pressed inputs of a device, bit masks by tPadInput.
 struct tDeviceState
 {
@@ -395,9 +396,6 @@ void GPDInitialize ()
 }
 
 
-/** Keys of the pad for the running game: "input=key,..." (the names of PMD_PAD), the rest is as without a game.
- *  Called when a game starts (REMAP "pad:lb=F2,pad:rb=F3" in games.lst) and with an empty text when it ends.
- */
 /** The key a pad input sends now (the defaults, PMD_PAD and the per-game override) and the name of the input, for the listing of
  *  the controls. Returns SDLK_UNKNOWN for an input without a key.
  */
@@ -411,6 +409,9 @@ SDL_Keycode GPDInputKey (int iInput, const char **ppName)
 }
 
 
+/** Keys of the pad for the running game: "input=key,..." (the names of PMD_PAD), the rest is as without a game.
+ *  Called when a game starts (REMAP "pad:lb=F2,pad:rb=F3" in games.lst) and with an empty text when it ends.
+ */
 void GPDSetGameKeys (const std::string &sSpec)
 {
   for (int i = 0 ; i < PAD_COUNT ; i ++)

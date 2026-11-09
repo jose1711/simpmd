@@ -943,6 +943,7 @@ static void KeysStart (const std::string &sTape)
   }
   KeysRemap (sTape);
   KBDSetJoystickOnly (GameHasCommand (sTape, "JOYONLY"));
+  CPUSetJoystickOff (GameHasCommand (sTape, "NOJOY"));
   iKeyPos = 0;
   bKeyDown = false;
   iKeyTime = SDL_GetTicks () + 1500;
@@ -1284,8 +1285,43 @@ static void EmulationShutdown ()
 //--------------------------------------------------------------------------
 // Main
 
+static void Usage (FILE *pOut)
+{
+  fprintf (pOut, "Usage: simpmd [GAME]   start the game GAME of games.lst (the case does not matter), no argument: the menu\n"
+                 "       simpmd --list   print the names of the games\n"
+                 "       simpmd --help   this text\n"
+                 "The environment variables of the test and debug modes are in doc/usage.md.\n");
+}
+
 int main (int iArgC, const char *apArgV [])
 {
+  // Command line, checked before anything is opened: simpmd [GAME | --list | --help]
+  bool bList = false;
+  const char *pArgGame = NULL;
+  if (iArgC > 2)
+  {
+    fprintf (stderr, "simpmd: too many arguments\n");
+    Usage (stderr);
+    return (2);
+  }
+  if (iArgC == 2)
+  {
+    if (strcmp (apArgV [1], "-h") == 0 || strcmp (apArgV [1], "--help") == 0)
+    {
+      Usage (stdout);
+      return (0);
+    }
+    else if (strcmp (apArgV [1], "-l") == 0 || strcmp (apArgV [1], "--list") == 0)
+      bList = true;
+    else if (apArgV [1][0] == '-')
+    {
+      fprintf (stderr, "simpmd: unknown option '%s'\n", apArgV [1]);
+      Usage (stderr);
+      return (2);
+    }
+    else
+      pArgGame = apArgV [1];
+  }
 
   // SDL Init
   SDL_CheckZero (SDL_Init (SDL_INIT_AUDIO | SDL_INIT_TIMER | SDL_INIT_VIDEO));
@@ -1304,11 +1340,8 @@ int main (int iArgC, const char *apArgV [])
   const char *pKeyMs = getenv ("PMD_KEY_MS");
   iKeyMs = pKeyMs ? atoi (pKeyMs) : 100;
   const char *pAutostart = getenv ("PMD_AUTOSTART");
-  const char *pGame = getenv ("PMD_GAME");
-  // simpmd <GAME> starts a game of the games list by its name (the same as PMD_GAME=<GAME>), simpmd --list prints the names.
-  bool bList = iArgC > 1 && (strcmp (apArgV [1], "--list") == 0 || strcmp (apArgV [1], "-l") == 0);
-  if (iArgC > 1 && apArgV [1][0] != '-')
-    pGame = apArgV [1];
+  // The game of the command line wins over PMD_GAME.
+  const char *pGame = pArgGame ? pArgGame : getenv ("PMD_GAME");
   GamesLoad ();
   if (bList)
   {

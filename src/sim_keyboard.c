@@ -20,6 +20,7 @@ limitations under the License.
 
 #include "sim_common.h"
 
+#include <atomic>
 #include <map>
 #include <utility>
 
@@ -130,8 +131,8 @@ void KBDWriteColumn (byte iData)
 /// Games with JOYONLY in the note: while the program polls the joystick, the keys that are the joystick (the cursor keys and Space,
 /// also the pad keys on them) do not go to the keyboard matrix, only to the joystick bits. JETSET WILLY takes Space on the keyboard
 /// for pause, so the fire button would pause the game when it is not held together with a direction.
-static volatile bool bJoystickOnly = false;
-static volatile Uint32 iJoystickRead = 0;
+static std::atomic <bool> bJoystickOnly (false);
+static std::atomic <Uint32> iJoystickRead (0);
 
 void KBDSetJoystickOnly (bool bOn)
 {
@@ -145,7 +146,7 @@ void KBDJoystickPolled ()
 
 static void KBDApply (SDL_Keycode iSym, Uint8 iState)
 {
-  if (iState == SDL_PRESSED && bJoystickOnly && iJoystickRead && SDL_GetTicks () - iJoystickRead < 150 &&
+  if (iState == SDL_PRESSED && bJoystickOnly && iJoystickRead && SDL_GetTicks () + 1 - iJoystickRead < 150 &&
       (iSym == SDLK_SPACE || iSym == SDLK_LEFT || iSym == SDLK_RIGHT || iSym == SDLK_UP || iSym == SDLK_DOWN))
     return;                     // a release is always applied, so no key stays down
   // Find the location of the key in the key map
@@ -215,7 +216,7 @@ static std::map <SDL_Keycode, Uint32> oPendingRelease;
 
 
 /// The cursor keys and Space as the PMD 85 joystick, a low bit is a pressed key (see GPDJoystickByte for the bits).
-static volatile byte iJoystickKeys = 0xFF;
+static std::atomic <byte> iJoystickKeys (0xFF);
 
 byte KBDJoystickByte ()
 {

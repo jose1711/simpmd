@@ -196,6 +196,7 @@ uint32 KBDScanCount ();
 uint32 KBDSeenCount ();
 byte KBDReadColumn ();
 byte KBDJoystickByte ();
+void CPUSetJoystickOff (bool);
 void KBDSetJoystickOnly (bool);
 void KBDJoystickPolled ();
 void KBDWriteColumn (byte iData);
