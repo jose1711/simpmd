@@ -27,6 +27,7 @@ limitations under the License.
 
 #include "sim_common.h"
 #include <set>
+#include <atomic>
 
 #include <semaphore.h>
 #include <unistd.h>
@@ -151,9 +152,37 @@ inline word MemReadWord (word iAddr)
 /// The RAM under the monitor ROM of the PMD 85-2A (AllRAM), written while the ROM is mapped.
 static byte abRamUnderRom [4096];
 
+/// Debug: PMD_MEMTRACE=<first>-<last> (hex addresses) logs the writes to that range with the address of the instruction.
+static int iTraceFirst = -1, iTraceLast = -1;
+/// Games with NOJOY in the note (or PMD_NOJOY=1): the joystick ports always read 0xFF (no joystick). Games that poll the joystick all
+/// the time, also when the keyboard is chosen (DIZZY, FRED, HORAC, MANIC-2), would take the keys that drive the emulated joystick twice.
+static std::atomic <bool> bJoystickOff (false);
+
+void CPUSetJoystickOff (bool bOff)
+{
+  bJoystickOff = bOff || getenv ("PMD_NOJOY") != NULL;
+}
+
+/// Debug: PMD_IOTRACE=1 logs the first access of the I/O ports that are not known and the polling of the joystick. One flag read at
+/// the start, so the instructions IN and OUT do not look at the environment.
+static bool bIoTrace = false;
+static void MemTraceInit ()
+{
+  bIoTrace = getenv ("PMD_IOTRACE") != NULL;
+  const char *pTrace = getenv ("PMD_MEMTRACE");
+  unsigned iFirst, iLast;
+  if (pTrace && sscanf (pTrace, "%x-%x", &iFirst, &iLast) == 2)
+  {
+    iTraceFirst = (int) iFirst;
+    iTraceLast = (int) iLast;
+  }
+}
+
 /// Writes a byte to simulated memory array if it is writable.
 inline void MemWriteByte (word iAddr, byte iData)
 {
+  if (__builtin_expect (iTraceFirst >= 0, 0) && iAddr >= iTraceFirst && iAddr <= iTraceLast)
+    fprintf (stderr, "W %04x=%02x pc %04x\n", iAddr, iData, (int) RegPC);
   byte iMask = abMemoryMask [iAddr];
   if (iMask == 1)
     abMemoryData [iAddr] = iData;
@@ -1376,6 +1405,42 @@ static byte JoystickFileByte ()
 }
 
 
+
+// The debug traces of the I/O ports (PMD_IOTRACE), outside of the instructions IN and OUT so that these stay small.
+
+static void IoTraceUnknownIn (int iPort)
+{
+  static std::set <int> oSeen;
+  if (oSeen.insert (iPort).second)
+    fprintf (stderr, "IN unknown port %02x pc %04x\n", iPort, (int) RegPC);
+}
+
+static void IoTraceOut (int iPort, byte iValue)
+{
+  static std::set <int> oSeen;
+  if (iPort != 0x1E && iPort != 0xF4 && iPort != 0xF6 && iPort != 0xF7 && oSeen.insert (iPort).second)
+    fprintf (stderr, "OUT port %02x value %02x pc %04x\n", iPort, iValue, (int) RegPC);
+}
+
+/// The first read of each joystick port, and how often the program polls the joystick (reads per second, printed every 2 s).
+static void IoTraceJoystick (int iPort)
+{
+  static std::set <int> oSeen;
+  static unsigned iReads = 0;
+  static Uint32 iWindow = 0;
+  if (oSeen.insert (iPort).second)
+    fprintf (stderr, "IN joystick port %02x pc %04x\n", iPort, (int) RegPC);
+  iReads ++;
+  Uint32 iNow = SDL_GetTicks ();
+  if (iNow - iWindow >= 2000)
+  {
+    if (iWindow && iReads > 1)
+      fprintf (stderr, "JOYPOLL %u reads in %u ms\n", iReads, (unsigned) (iNow - iWindow));
+    iWindow = iNow;
+    iReads = 0;
+  }
+}
+
 void InstIN ()
 {
   CPU_LOG_INST_B (IN);
@@ -1408,21 +1473,13 @@ void InstIN ()
     // pressed inputs. Both ports show the same joystick: the cursor keys with Space, and the gamepad with the button A.
     case 0x4C:
     case 0x4D:  KBDJoystickPolled ();
-                RegA = KBDJoystickByte () & GPDJoystickByte () & JoystickFileByte ();
-                {
-                  static const bool bJoyTrace = getenv ("PMD_IOTRACE") != NULL;
-                  static std::set <int> oSeenJoy;
-                  if (bJoyTrace && oSeenJoy.insert (iPort).second)
-                    fprintf (stderr, "IN joystick port %02x pc %04x\n", iPort, (int) RegPC);
-                }
+                RegA = bJoystickOff ? 0xFF : (KBDJoystickByte () & GPDJoystickByte () & JoystickFileByte ());
+                if (bIoTrace)
+                  IoTraceJoystick (iPort);
                 break;
     default:    RegA = 0xFF;
-                {
-                  static const bool bIoTrace = getenv ("PMD_IOTRACE") != NULL;
-                  static std::set <int> oSeen;
-                  if (bIoTrace && oSeen.insert (iPort).second)
-                    fprintf (stderr, "IN unknown port %02x pc %04x\n", iPort, (int) RegPC);
-                }
+                if (bIoTrace)
+                  IoTraceUnknownIn (iPort);
                 break;
   }
   iProcessorClock += 10;
@@ -1443,12 +1500,8 @@ void InstOUT ()
     iProcessorClock += 10;
     return;
   }
-  {
-    static const bool bIoTrace = getenv ("PMD_IOTRACE") != NULL;
-    static std::set <int> oSeenOut;
-    if (bIoTrace && iPort != 0x1E && iPort != 0xF4 && iPort != 0xF6 && iPort != 0xF7 && oSeenOut.insert (iPort).second)
-      fprintf (stderr, "OUT port %02x value %02x pc %04x\n", iPort, RegA, (int) RegPC);
-  }
+  if (bIoTrace)
+    IoTraceOut (iPort, RegA);
   switch (iPort)
   {
     case 0x1E:  TAPWriteData (RegA);
@@ -1879,6 +1932,7 @@ void CPUTerminateThread ()
 
 void CPUInitialize ()
 {
+  MemTraceInit ();
   // Initialize the semaphores for suspend and resume handling.
   //CheckZero (sem_init (&sSignalSuspend, false, 0));
   //printf("Suspend semaphore init..\n");
