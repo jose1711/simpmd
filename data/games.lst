@@ -204,7 +204,7 @@ SMYCKY;1;MGLD 00;;;F1 hra, F2 info, F3 tabulka, F4 cernobile, F5 zmena ovladani,
 BOULD+4;1;MGLD 03;Return=H,Space=H,Up=E,Down=Z;E up:e,Y down:z,Left:Left,Right:Right,H:h,Esc:Escape;H hra, I informace, sipky vlevo/vpravo, E/Y nahoru/dolu (pad a TV: OK = H);PR;Arkady/BOULDER
 MANIC23C;1;MGLD 03;Space=Left Shift,Up=@Left Shift,Down=A;Left:Left,Right:Right,Jump:Left Shift,Jump left:Left Shift&Left,Jump right:Left Shift&Right,Enter:Return,H:h,0:0,Esc:Escape;H hra (menu cheatu: 1-5 volby, 0 spusti hru, Enter = start), sipky, skok: Shift nebo sipka nahoru;;Plosinovky/MANIC
 PEXESO2;2;MGLD 00;;;menu: 1 hra dvou hracu, 2 proti pocitaci, 3 klavesy, 4 ukazka, 5 konec;;Deskove hry/PEXESO
-WILLY2;2;MGLD 00, JUMP 0000;;;Space = start;;Plosinovky/WILLY
+WILLY2;2;MGLD 00, JUMP 0000;Left=Keypad 5,Up=Space,Down=m,Return=Space,pad:up=Space,pad:down=m;Left:Left,Right:Right,Jump:Space,Esc:Escape;sipky vlevo/vpravo, Space nebo sipka nahoru = skok a start;PR;Plosinovky/WILLY
 KVADRO;1;MGLD 00;;;menu: S start (K klavesnice, J joystick, R redefinice, F barvy);;Logicke hry/KVADRO
 KVADRO.E;1;MGLD 00;;;menu: S start (K klavesnice, J joystick, R redefinice, F barvy);;Logicke hry/KVADRO
 PLOTTING;1;MGLD 00;;;menu: 1 klavesnice, 2 joystick, 3 monochrom, 5 start (po vyberu 1);;Logicke hry
