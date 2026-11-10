@@ -186,7 +186,7 @@ JETPAC;1;MGLD 01;;;Jetpac: v menu 3 = klavesnice, 4 = joystick (sipky + mezernik
 PSSST;1;MGLD 02;;;Pssst: v menu 3 = klavesnice, 5 = start, 7 = nastaveni klaves;;Plosinovky
 ARKANOID;1;MGLD 04;Return=Space;Left:Left,Right:Right,Space:Space,Esc:Escape;sipky vlevo/vpravo = palka, Space = start a odpal micku (pad: A, B nebo Start, TV: OK = Space), na tabulce neprepinat J (ovladac);PR;Arkady/ARKANOID
 ARKANOID-S;1;MGLD 04, POKE 355F 00, POKE 3560 00, POKE 3561 00, POKE 357D 00, POKE 357E 00, POKE 357F 00;Return=Space;Left:Left,Right:Right,Space:Space,Esc:Escape;sipky vlevo/vpravo = palka, Space = start a odpal micku (pad: A, B nebo Start, TV: OK = Space), na tabulce neprepinat J (ovladac) (upraveno: palka zrychluje stejne vlevo i vpravo);PR;Arkady/ARKANOID
-TREAISLA;1;MGLD 05;Left=O,Right=P,Up=Q,Down=A,Space=M,Return=S;Q up:q,A down:a,O left:o,P right:p,M hod mece/skok:m,S start:s,H pauza:h,T pokracovat:t,Esc:Escape;S = start, pak M (PRESS FIRE), Q/A/O/P = pohyb, M = hod mece/skok, H pauza, T pokracovat, F1 = zvuk (pad: D-pad, A = M, B = S);P;Plosinovky
+TREAISLA;1;MGLD 05;Left=O,Right=P,Up=Q,Down=A,Space=M,Return=S,pad:up=q,pad:down=a;Up:Up,Down:Down,Left:Left,Right:Right,M hod mece/skok:Space,S start:s,H pauza:h,T pokracovat:t,Esc:Escape;S = start, pak M nebo Space (PRESS FIRE), sipky = pohyb, M nebo Space = hod mece/skok, H pauza, T pokracovat, F1 = zvuk;P;Plosinovky
 TRAILBLA;1;MGLD 06;;;Enter = hra, I informace, B barvy, H hudba, J joystick (jen klavesnice);;Arkady
 JSWILLY;1;MGLD 08, JOYONLY;;;Jet Set Willy: v menu 3 = start, 1 = ovladani (jen klavesnice);;Plosinovky
 FFRUITS;1;MGLD 09;;;Enter = nova hra, Keypad + (RCL) = redefinice klaves, Ctrl (STOP) = menu, 1-4 nastaveni (jen klavesnice);;Logicke hry
