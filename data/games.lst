@@ -171,7 +171,7 @@ TINYBASIC;1;MGLD 01, JUMP 0000;;;TINY BASIC 1.0 (Li-Chen Wang 1976, port Libor L
 TINYBASIC-2;2;MGLD 02, JUMP 0000;;;TINY BASIC 1.0 (Li-Chen Wang 1976, port Libor L.A. 2018, verze 1.02 pro PMD 85-2 a vyssi): cela cisla, prikazy LIST LOAD n NEW RUN SAVE CLS, LOAD 3 az 13 nacte ukazky z pasky (3 napoveda, 4 prime prikazy, 5 PRINT, 6 FOR NEXT, 7 IF, 8 GOSUB, 9 pole, 10 INPUT, 11 RND, 12 BOOLEAN, 13 Eratosthenes), Enter potvrzuje, Backspace nebo sipka vlevo maze;;Programovani/TINYBASIC
 VIDEOSTP;2;ROM basic2.rmm, FONT, TYPE LOAD 11, TYPE RUN;;;F1 (K0) zastavi kostky, Enter, jmeno z klavesnice;;Arkady
 VOTRELCI;2;ROM basic2.rmm, FONT, TYPE LOAD 0, TYPE RUN;E=F1,Z=F2,Up=F1,Down=F2,Left Shift=F9;Up:F1,Down:F2,Fire:F9,Space:Space,Esc:Escape;F1 zbran nahoru, F2 dolu, F9 vystrel, mezernik start, pri konci 1 nebo 0 (pad: D-pad, LB vystrel, A start);;Strielacky
-WILLY;1;MGLD 00;;;;;Plosinovky/WILLY
+WILLY;1;MGLD 00;Left=P,Up=Space,Down=m,Return=Space,pad:up=Space,pad:down=m;Left:Left,Right:Right,Jump:Space,Esc:Escape;sipky vlevo/vpravo, Space nebo sipka nahoru = skok a start;PR;Plosinovky/WILLY
 WURMI;2;ROM basic2.rmm, FONT, TYPE LOAD 7, TYPE RUN;Left=F1,Right=F4,Up=F3,Down=F2,E=F3,Z=F2;Left:F1,Down:F2,Up:F3,Right:F4,Esc:Escape;F1 vlevo, F2 dole, F3 nahoru, F4 vpravo (K0-K3), pak libovolna klavesa;PR;Arkady
 ZABY;1;MGLD 00, JUMP 1500;;Jump:F5,Start line:F10,Esc:Escape;F5 = skok, F10 = startovaci cara, zapis jmena do tabulky z klavesnice;;Arkady
 ZED;1;MGLD 00, JUMP 1000;Left=Left Shift,Right=V;Left:Left,Right:Right,Shift:Left Shift,Esc:Escape;Shift = vlevo, V = vpravo;PR;Arkady
