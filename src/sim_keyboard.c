@@ -131,6 +131,8 @@ void KBDWriteColumn (byte iData)
 /// Games with JOYONLY in the note: while the program polls the joystick, the keys that are the joystick (the cursor keys and Space,
 /// also the pad keys on them) do not go to the keyboard matrix, only to the joystick bits. JETSET WILLY takes Space on the keyboard
 /// for pause, so the fire button would pause the game when it is not held together with a direction.
+/// The program polls the joystick when it read the port within this time (MTRON reads it 6 times a second, JSWILLY on every frame).
+#define JOYSTICK_POLL_MS        1000
 static std::atomic <bool> bJoystickOnly (false);
 static std::atomic <Uint32> iJoystickRead (0);
 
@@ -146,7 +148,7 @@ void KBDJoystickPolled ()
 
 static void KBDApply (SDL_Keycode iSym, Uint8 iState)
 {
-  if (iState == SDL_PRESSED && bJoystickOnly && iJoystickRead && SDL_GetTicks () + 1 - iJoystickRead < 150 &&
+  if (iState == SDL_PRESSED && bJoystickOnly && iJoystickRead && SDL_GetTicks () + 1 - iJoystickRead < JOYSTICK_POLL_MS &&
       (iSym == SDLK_SPACE || iSym == SDLK_LEFT || iSym == SDLK_RIGHT || iSym == SDLK_UP || iSym == SDLK_DOWN))
     return;                     // a release is always applied, so no key stays down
   // Find the location of the key in the key map
