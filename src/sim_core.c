@@ -187,6 +187,10 @@ static Uint32 CtrlTimerCallback (Uint32 iInterval, void *pSerial)
 static std::string sKeys;
 /// Position in the keys, key press or release.
 static int iKeyPos;
+/// The minimal hold time of the keys of the game (KEYHOLD, PMD_KBD_HOLD_MS) is set when the autoload has typed its text: a long hold
+/// would blend the typed keys into each other (the commands of the monitor would be garbled).
+static int iGameKeyHold = 60;
+static bool bGameKeyHoldSet = true;
 static bool bKeyDown;
 /// Time of the next key event.
 static Uint32 iKeyTime;
@@ -1248,7 +1252,9 @@ static void EmulationInitialize (const std::string &sTape, int iModel)
   // PMD_KBD_HOLD_MS overrides both.
   {
     std::string sHold = GameCommandArgument (sTape, "KEYHOLD");
-    KBDSetHold (getenv ("PMD_KBD_HOLD_MS") ? atoi (getenv ("PMD_KBD_HOLD_MS")) : !sHold.empty () ? atoi (sHold.c_str ()) : 60);
+    iGameKeyHold = getenv ("PMD_KBD_HOLD_MS") ? atoi (getenv ("PMD_KBD_HOLD_MS")) : !sHold.empty () ? atoi (sHold.c_str ()) : 60;
+    KBDSetHold (60);
+    bGameKeyHoldSet = false;                   // applied by the event loop after the typed text
   }
   printf("KBD initializing..\n");
   SNDInitialize ();
@@ -1779,6 +1785,10 @@ int main (int iArgC, const char *apArgV [])
             bKeyDown = !bKeyDown;
             iKeyTime = iNow + iKeyMs;
             }
+          }
+          if (!bGameKeyHoldSet && iKeyPos >= (int) sKeys.size () && !bKeyDown) {
+            KBDSetHold (iGameKeyHold);
+            bGameKeyHoldSet = true;
           }
           // Test: PMD_STATE_SCRIPT="s5000,l9000" saves (s) and loads (l) the state at the given simulated times [ms].
           static const char *pStateScript = getenv ("PMD_STATE_SCRIPT");
