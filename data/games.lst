@@ -75,7 +75,7 @@ HORAC;2;MGLD 00;Left=I,Right=P,Up=E,Down=Z,Return=N;E up:e,Y down:z,I left:i,P r
 INVADERS;1;MGLD 00, JUMP 0100;Left Shift=End,Keypad +=PageDown,E=0,Z=1,H=2,I=3,Return=Space,Up=0,Down=1;Left:Left,Right:Right,Fast left:End,Fast right:PageDown,Fire:Space,0:0,1:1,2:2,3:3,Esc:Escape;sipky, End/PgDn rychle, Space (na dalkovem OK) strelba, 0-3 obtiznost, TV: jen obtiznost 0 (nahoru) a 1 (dolu);PR;Strielacky
 JASON;2;MGLD 00;Return=Space;Left:Left,Right:Right,Space:Space,Esc:Escape;mezera = menu/potvrdit, sipky vlevo/vpravo pohyb (pad: A, B nebo Start, TV: OK = mezera, text se nepise);PR;Textove adventury
 JERRY;1;MGLD 00, JUMP 1100;Up=E,Down=Z;Left:Left,Right:Right,E up:e,Y down:z,Space:Space,Esc:Escape;Jerry (VBG Software, vsechny modely): titulka Space, potom volba obtiznosti a hra, sipky vlevo a vpravo, E nahoru, Y dolu (pad: D-pad, A = Space);P;Arkady
-JOE1;2;ROM basic2.rmm, FONT, TYPE LOAD 1, TYPE RUN;Left=F10,Right=F12,Space=F11,pad:a=F11,pad:start=F12;Left:F10,Right:F12,K10:F11,Start:F12,Esc:Escape;sipky vlevo/vpravo, mezernik = skok, hru spustite podrzenim sipky vpravo (na pade Start, tez podrzet), po konci hry Enter (znovu) nebo N + Enter (konec);P;Plosinovky
+JOE1;2;ROM basic2.rmm, FONT, TYPE LOAD 1, TYPE RUN;Left=F10,Right=F12,Space=F11,pad:a=F11,pad:start=F12;Left:F10,Right:F12,K10:F11,Start:F12,Esc:Escape;sipky vlevo/vpravo, mezernik = skok, hru spustite podrzenim sipky vpravo (na pade Start, tez podrzet), stret se zahradnikem = hra zacne znovu od zacatku;P;Plosinovky
 KANKAN;1;MGLD 00, JUMP 0000;;;demo, bez ovladani;PR;Dema
 KAREL;1;MGLD 00, JUMP 0000;;;prikazy z klavesnice (zadavani prikazu);;Programovani/KAREL
 KAREL-2R;1;MGLD 00, JUMP 0000;;;2D Karel (T. Bartovsky): prikazy z klavesnice, vzdy jedno slovo a Enter;;Programovani/KAREL
