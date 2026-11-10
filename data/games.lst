@@ -137,7 +137,7 @@ OSTROV;2;ROM basic2.rmm, FONT, TYPE LOAD 1, TYPE RUN;Left=F10,Right=F12,E=F8,Z=F
 PAMPUCH;1;MGLD 01;Left=End,Right=PageDown,Up=W,Down=Z,Return=S,Space=S,pad:up=w,pad:down=z,pad:left=End,pad:right=PageDown,pad:a=s,pad:start=s;Left:End,Right:PageDown,Up:W,Down:Z,H:h,S:s,Esc:Escape;H hrat, S nebo Space start, sipky;P;Plosinovky/PAMPUCH
 PAMPUCHX;1;MGLD 00;Up=W,Down=Z,Return=S,Space=S,pad:up=w,pad:down=z,pad:a=s,pad:start=s;Left:Left,Right:Right,Up:W,Down:Z,H:h,S:s,Esc:Escape;Pampuch a duch (255 zivotu): H hrat, K kopirovat, S start, sipky;P;Plosinovky/PAMPUCH
 PANGO;1;MGLD 00;;;Hungry Pango (D. Blasko): G hra, S ulozit;;Arkady
-PAVUCI;2;ROM basic2.rmm, FONT, TYPE LOAD 40, TYPE RUN;Left=I,Right=P,Up=E,Down=Z,Return=N;E up:e,Y down:z,I left:i,P right:p,N jump:n,Esc:Escape;sipky = pohyb (E/Y/I/P), N = skok (podrzet), libovolna klavesa start (pad: B skok - podrzet);P;Plosinovky
+PAVUCI;2;ROM basic2.rmm, FONT, TYPE LOAD 40, TYPE RUN;Left=I,Right=P,Up=E,Down=Z,Return=N;E up:e,Y down:z,I left:i,P right:p,N jump:n,Esc:Escape;sipky = pohyb (E/Y/I/P), N = skok (podrzet), Space = start po uvodnej obrazovke;P;Plosinovky
 PENETR;2;MGLD 03;Up=E,Down=Z,pad:x=F1,pad:y=Home;Up:E,Down:Z,Brake:Left,Fire:Right,Bomb:Space,Land:Home,Training:F1,Esc:Escape;E nahoru, Y dolu, sipka vpravo strelba, vlevo brzdeni, Space bomba (a start hry), Home pristani (pad: Y), F1 trenink (pad: X);P;Strielacky
 PEXESO;2;MGLD 00;;;;;Deskove hry/PEXESO
 PEXESO-B;2;ROM basic2.rmm, FONT, TYPE LOAD 30, TYPE RUN;;;Enter start, cisla radku a sloupce karet z klavesnice;;Deskove hry/PEXESO
