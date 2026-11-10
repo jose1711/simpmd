@@ -324,9 +324,15 @@ static void GPDVirtualPoll ()
     return;
   int iLow = fgetc (pStream);
   int iHigh = fgetc (pStream);
+  int iLeftTrigger = fgetc (pStream);          // optional, 0 to 255: the triggers LT and RT
+  int iRightTrigger = fgetc (pStream);
   fclose (pStream);
   if (iLow == EOF || iHigh == EOF)
     return;
+  if (iLeftTrigger != EOF)
+    SDL_JoystickSetVirtualAxis (pVirtualPad, SDL_CONTROLLER_AXIS_TRIGGERLEFT, (Sint16) (iLeftTrigger * 32767 / 255));
+  if (iRightTrigger != EOF)
+    SDL_JoystickSetVirtualAxis (pVirtualPad, SDL_CONTROLLER_AXIS_TRIGGERRIGHT, (Sint16) (iRightTrigger * 32767 / 255));
   int iMask = iLow | (iHigh << 8);
   for (int i = 0 ; i < 15 ; i ++)
     SDL_JoystickSetVirtualButton (pVirtualPad, i, (iMask >> i) & 1);
