@@ -146,7 +146,7 @@ POKLAD;2;ROM basic2.rmm, FONT, TYPE LOAD 1, TYPE RUN;Left=F10,Right=F12,E=F8,Z=F
 PODRAZ;2;ROM basic2.rmm, FONT, TYPE LOAD 0, TYPE RUN;;;Podraz (textova hra v BASICu z disket Zbrojovacek, ne presna kopie Podraz 3): po uvodu Z zavolat telefonem, S precist zpravu, Shift+P polozi telefon, odpovedi a prikazy z klavesnice, Enter;;Textove adventury
 POSTARIK;2;MGLD 00;Left=F1,Down=F2,Up=F3,pad:left=F1,pad:down=F2,pad:up=F3,pad:a=Space,pad:b=F5,pad:start=Return,pad:back=F12,pad:ls=Keypad +,pad:rs=Keypad +;Left:Left,Right:Right,Up:Up,Down:Down,Enter:Return,Level 1:F2,Level 2:F3,Level 3:F4,Level 4:F5,Menu:F12,Info:Keypad +,Esc:Escape;sipky, mezera start, Enter potvrdit, F12 menu, F2-F5 uroven, Num+ (RCL) info;P;Pro nejmensi
 PUZZLE;1;MGLD 00, JUMP 0000;Left=F1,Down=F2,Up=F3,Right=F4,E=F3,Z=F2,H=F6,Space=F6,Return=F12;Left:F1,Down:F2,Up:F3,Right:F4,Shuffle:F6,Again:F12,Esc:Escape;na zacatku F1 = tvar, F2 = pivo, potom sipky posouvaji volne pole (F1-F4), F6 michat (pad: A, X), F12 znovu (OK);PR;Deskove hry
-RESCUER;1;MGLD 01;;;Rescuer Willy (M. Urda): G hra, S ulozit;;Plosinovky
+RESCUER;1;MGLD 01;Left=End,Right=PageDown,Space=Left Shift,pad:left=End,pad:right=PageDown,pad:a=Left Shift,pad:x=a,pad:start=g,pad:y=s;Left:End,Right:PageDown,Jump:Left Shift,Jump forward:a,G:g,S:s,Esc:Escape;Rescuer Willy (M. Urda): G hra, S ulozit, sipky vlevo/vpravo, Space skok na miste, A skok dopredu;P;Plosinovky
 REVERZ;2;ROM basic2.rmm, FONT, TYPE LOAD 0, TYPE RUN;;;uroven 0-3, tahy souradnicemi z klavesnice, odpovedi A/N;;Deskove hry/REVERZ
 REVERZ-MC;2;MGLD 00, JUMP 0000;;;Reverz alias Othello (strojovy kod, SEN Software): libovolna klavesa start;;Deskove hry/REVERZ
 REZ;2;ROM basic2.rmm, FONT, TYPE LOAD 0, TYPE RUN;;;ukazka: Enter pokracuje;;Naucne
