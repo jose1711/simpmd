@@ -61,8 +61,8 @@ CEC = can it be played with the TV remote (cursor keys, OK, Back; no letters or 
 | CROSFIRE | ano | nie | pohyb I K J L (D-pad), streľba R D S F (Y hore, A dole, X vľavo, B vpravo); CEC nemá čím strieľať do 4 smerov |
 | CROSSI | ano | nie | ako CROSFIRE, G štart (pad: Start) |
 | LAVICKA | ano | nie | úvod: „Hrali ste už?" N (pad: X) + Enter, rekord 0 (pad: Y) + Enter; skoky D-pad (F1, F2, F9, F10) |
-| REVERZ-MC | neurčené | nie | Othello v strojovom kóde, neskúšané |
-| FFRUITS | neurčené | nie | klávesy sa definujú cez RCL, v teste hra na pad nereagovala |
+| REVERZ-MC | nie | nie | ľubovoľná klávesa, úroveň 0–9, začať (a/n), hráč o/x, potom šípky; iba klávesnica (potvrdil používateľ) |
+| FFRUITS | ano | ano | šípky + Enter; pad: všetky tlačidlá = Enter (bez redefinície kláves) |
 | SABOTER | nie | nie | potrebuje klávesnicu (menu a nastavenie ovládania) |
 
 The rest of the games without a pad or TV icon (about 50) are programs, programming languages, editors and educational demos
