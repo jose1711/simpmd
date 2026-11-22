@@ -1,0 +1,29 @@
+# Thumbnails of the main menu: NAME X Y SCALE. The window of 174/SCALE PMD 85 pixels with the top left corner at X,Y
+# (of the 288x256 screen) is magnified SCALE times (3 = 58x58 pixels, 2 = 87x87, 1 = 174x174), the pixels stay sharp.
+# make-thumbs.sh makes <NAME>.png (174x174, 1 bit) of <NAME>.bmp, a screenshot of the game (PMD_SCREENSHOT).
+AUTO 88 170 3
+CROSSI 130 198 3
+DOMCEKY 155 112 2
+FERLAJT 140 130 2
+GLUTTON 85 30 3
+HLIPA 95 35 3
+INVADERS 110 14 3
+KANKAN 55 165 2
+KAREL 140 65 3
+KAREL3D 45 60 3
+KURA 125 50 3
+MANIC-1 95 65 3
+MANIC-2 75 105 3
+PAMPUCH 0 5 3
+PENETR 140 120 2
+PISQORKY 110 70 3
+POSTARIK 10 105 2
+ROBOTIK 70 95 3
+SABOTER 115 105 3
+SACH 130 125 3
+SASKO 20 20 2
+SPACE-RA 25 60 2
+TANK 228 2 3
+ZABY 10 169 2
+ZED 114 198 3
+ZMRZLINY 110 30 2
