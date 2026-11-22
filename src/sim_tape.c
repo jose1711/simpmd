@@ -86,6 +86,11 @@ static std::string sSavePath;
 static std::string sLoopPath;
 /// Time (SDL ticks) of the last try to open the save file for reading.
 static Uint32 iSaveTry = 0;
+/// Time (SDL ticks) of the last byte the program wrote into the save file, 0 if none.
+static Uint32 iSaveWriteTime = 0;
+/// The program is saving while it writes at least this often [ms]: its polls of the tape status must not switch to reading
+/// (that closes the save file and the next byte would start a new, truncated one). A tape runs at 240 bytes/s.
+#define PMD_SAVE_ACTIVE_MS 500
 
 
 //--------------------------------------------------------------------------
@@ -194,6 +199,9 @@ bool TAPInputFileStatus ()
       // and again from the start when the program has read it all and asks for data once more. Looking for the
       // file is limited, the program polls the status very often.
       Uint32 iNow = SDL_GetTicks ();
+      // The program is just saving: the saved tape is not read yet.
+      if (oTapeOutput.is_open () && iSaveWriteTime != 0 && iNow - iSaveWriteTime < PMD_SAVE_ACTIVE_MS)
+        return (false);
       if (iNow - iSaveTry < 200)
         return (false);
       iSaveTry = iNow;
@@ -419,6 +427,8 @@ void TAPWriteData (byte bData)
   if (TAPStatusTxRDY ())
   {
     iLastOutputClock = iProcessorClock;
+    if (!sSavePath.empty ())
+      iSaveWriteTime = SDL_GetTicks () | 1;
     if (!sSavePath.empty () && !oTapeOutput.is_open ())
     {
       // The first byte of a save: a new tape replaces the old one.
@@ -467,6 +477,7 @@ void TAPSetSaveFile (const std::string &sPath)
 {
   sSavePath = sPath;
   iSaveTry = 0;
+  iSaveWriteTime = 0;
   // Nothing of the previous game stays: its saved tape is not the input, its output file is not written any more.
   bSaveStream = false;
   bSaveRewind = false;

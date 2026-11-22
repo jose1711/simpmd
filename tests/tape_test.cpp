@@ -28,12 +28,27 @@ int main (int, char **argv)
   printf ("Fix 2: a second save replaces the first\n");
   TAPSetSaveFile (sA);
   Write ("AAA");
+  SDL_Delay (600);                            // the user starts the load some time after the save
   TAPInputFileStatus ();                      // the program loads: the saved tape is opened (and flushed)
   CHECK (Slurp (sA.c_str ()) == "AAA", "first save is on the disk when it is read");
   Write ("BB");                               // the second save
   Wait ();
   TAPInputFileStatus ();
   CHECK (Slurp (sA.c_str ()) == "BB", "second save replaced the file (not AAABB)");
+
+  printf ("Fix 2b: polling the tape status during a save does not cut it\n");
+  remove (sA.c_str ());
+  TAPSetSaveFile (sA);
+  TAPNextInputFile (std::vector <std::string> (1, sG));
+  for (int i = 0 ; i < 3 ; i ++) TAPReadData ();   // the tape of the game is read to its end
+  Wait ();
+  for (const char *p = "0123456789" ; *p ; p ++)
+  {
+    TAPWriteData (*p);
+    SDL_Delay (50);
+    TAPInputFileStatus ();                    // the program polls the status (IN 1F) while it saves
+  }
+  CHECK (Slurp (sA.c_str ()) == "0123456789", "all the bytes of a slow save are in the file");
 
   printf ("Fix 3: the tape flags do not survive into the next game\n");
   Put (sB.c_str (), "SSS");
