@@ -33,11 +33,11 @@ CEC = can it be played with the TV remote (cursor keys, OK, Back; no letters or 
 | FLAPPY | ano | nie | H štart (pad X), E/Y hore/dole, Space hod; kódy len z klávesnice |
 | FLAPPY-V1 | ano | nie | ako FLAPPY |
 | VIDEOSTP | ano | nie | F1 zastaví kocky (A); meno do tabuľky z klávesnice |
-| SOLITER | ano | neurčené | kurzor šípkami, Space/Enter = klik; z titulky sa na OK nedostal automatický test, treba ručne |
+| SOLITER | ano | ano | Up/Down = kurzor (E/Z), Space/Enter = klik; ovládač prejde z titulky do hry (Hore, Hore, OK) |
 | PEXESO | ano | nie | menu 2 = proti počítaču (pad: X) |
 | PEXESO2 | ano | nie | menu 2 = proti počítaču (pad: X) |
 | PANGO | ano | nie | G štart (pad: Y), Enter na úvodnej strane, O P E D cez D-pad, pauza RCL (RB) |
-| DOOM85 | ano | neurčené | hrá sa ~5 min, potom obraz zamrzne (smrť alebo koniec levelu?), nepodarilo sa mi zistiť, ako pokračovať; pad: X = nôž, Y = pištoľ |
+| DOOM85 | ano | ano | Enter = štart a nová hra po konci; pad: X = nôž, Y = pištoľ; ovládač nemá streľbu mimo OK (Enter) – hrateľné obmedzene |
 | FARAON | nie | nie | textová hra, príkazy z klávesnice |
 | MESTO | nie | nie | textová hra |
 | BKP | nie | nie | textová hra |
