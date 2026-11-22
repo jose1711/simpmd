@@ -64,7 +64,7 @@ ELKA;2;ROM basic2.rmm, FONT, TYPE LOAD 0, TYPE RUN;;;F1 ano, F2 ne (K0, K1), tah
 ERB;2;ROM basic2.rmm, FONT, TYPE LOAD 1, TYPE RUN;Left=F10,Right=F12,E=F8,Z=F11,Up=F8,Down=F11,Space=F1;Left:F10,Right:F12,Up:F8,Down:F11,K0:F1,Esc:Escape;sipky vlevo/vpravo, hore = skok, dolu jen na urcitych mistech, mezernik (F1) drzet = sila, znovu = hod, Enter po konci hry;P;Plosinovky
 FARAON;2;ROM basic2.rmm, FONT, TYPE LOAD 3, TYPE RUN;;;P vpravo, L vlevo, H nahoru, D dolu, Enter, odpovedi A/N, jmeno z klavesnice;;Textove adventury
 FERLAJT;1;MGLD 13;Space=Return;Enter:Return,Esc:Escape;hudebni demo, staci Enter;PR;Dema
-FLAPPY;1;MGLD 03;Up=E,Down=Z;E up:e,Y down:z,Left:Left,Right:Right,Space:Space,Enter:Return,H:h,I:i,Shift:Left Shift,RCL:Keypad +,Stop:Left Ctrl,F1:F1,Esc:Escape;E/Y nahoru/dolu, Space = hod, F1 = konec, Stop (Ctrl) = reset, kody jen klavesnici;;Logicke hry/FLAPPY
+FLAPPY;1;MGLD 03;Up=E,Down=Z;E up:e,Y down:z,Left:Left,Right:Right,Space:Space,Enter:Return,H:h,I:i,Shift:Left Shift,RCL:Keypad +,Stop:Left Ctrl,F1:F1,Esc:Escape;E/Y nahoru/dolu, Space = hod, F1 = konec, Stop (Ctrl) = reset, kody jen klavesnici;P;Logicke hry/FLAPPY
 FRED;2;MGLD 03;Up=E,Down=Z,pad:start=Left Ctrl,pad:y=S,pad:b=C;E up:e,Y down:z,Left:Left,Right:Right,Space:Space,H:h,RCL:Keypad +,Stop:Left Ctrl,S:s,C:c,Esc:Escape;H start hry, RCL rychlost ptaku, sipky vlevo/vpravo, E/Y nebo sipky nahoru/dolu, Space start, Ctrl = STOP (pauza), potom S znovu / C pokracovat;P;Plosinovky/FRED
 FRED-4;1;MGLD 03;Up=E,Down=Z,pad:start=Left Ctrl,pad:y=S,pad:b=C;E up:e,Y down:z,Left:Left,Right:Right,Space:Space,H:h,RCL:Keypad +,Stop:Left Ctrl,S:s,C:c,Esc:Escape;H start hry, RCL rychlost ptaku, sipky vlevo/vpravo, E/Y nebo sipky nahoru/dolu, Space start, Ctrl = STOP (pauza), potom S znovu / C pokracovat (verze +4 pro oba typy PMD, VBG software 1988);P;Plosinovky/FRED
 GALAXIA;1;MGLD 00;;Space:Space,M:m,T:t,Z:y,S:s,Enter:Return,Backspace:Backspace,Esc:Escape;Space start, M/T/Z/S vyber, Enter potvrzeni, Backspace maze;;Strielacky/GALAXIA
@@ -123,7 +123,7 @@ BKP;1;MGLD 0E;;;Bratrstvo kocici pracky (Petr K. a Libor L.A., 2023), textova hr
 MICRHYTM;1;MGLD 05;;Left:Left,Right:Right,Enter:Return,1:1,2:2,P:p,S:s,Esc:Escape;Micro Rhythm (M. Urda): P = hra na bubny, S = ulozit, pak sipky vlevo/vpravo a Enter (PATERNS EDIT PLAY TEMPO LOAD), v podmenu 1 a 2;;Programy/Hudba
 MINY;1;MGLD 0C;Up=End,E=End,Space=Up,H=PageUp,I=F2;Left:Left,Right:Right,Up:End,Down:Down,Open:Up,Flag:PageUp,Restart:F2,Start:Return,Esc:Escape;Miny (hledani min, Libor L.A. 2021, jen model 1 pro tento zavadec): menu L obtiznost, C barvy, M mys (602 neni), Enter start, I info, hra: sipky vlevo vpravo dolu, nahoru = sipka nahoru, Space otevre policko, H oznaci (CLR), F2 restart, Esc zpet do menu;P;Logicke hry
 VLAK;1;MGLD 00;Up=Q,Down=A,Left=O,Right=P,E=Q,Z=A;Left:O,Right:P,Up:Q,Down:A,Password:F4,Esc:Escape;Vlak (Miroslav Nemecek 1993, port Libor L.A. 2025, jen model 1 pro tento zavadec): na titulce J joystick, Z zvuk, C barvy, libovolna klavesa start, hra QAOP, F4 heslo, Esc zpet na titulku;P;Arkady
-MISSION;1;MGLD 06;;;Super Mission (M. Urda): G hra, R nahravani;;Arkady
+MISSION;1;MGLD 06;pad:y=g;;Super Mission (M. Urda): G hra, R nahravani;P;Arkady
 MRAVEC;2;ROM basic2.rmm, FONT, TYPE LOAD 34, TYPE RUN;;;jednoduchy logicky jazyk Mravec: prikazy z klavesnice;;Programovani/MRAVEC
 MTRON-1;1;MGLD 00, JOYONLY, KEYHOLD 350;pad:up=Up,pad:down=Down,pad:start=3,pad:y=2,pad:lb=1,pad:rb=Left Ctrl,pad:x=a,pad:lt=Left Shift;Left:Left,Right:Right,Up:Up,Down:Down,Fire:Space,1:1,2:2,3:3,4:4,A:a,Enter:Return,Stop:Left Ctrl,Esc:Escape;menu: 1 rotacni ovladani, 2 prime ovladani, 3 start, 4 demo (v 3. dile trenink), hra: sipky a mezernik (strelba), Ctrl = STOP (pauza), Shift+Ctrl = konec hry, zadani inicialu: pismeno A;PR;Plosinovky/MTRON
 MTRON-2;1;MGLD 00, JOYONLY, KEYHOLD 350;pad:up=Up,pad:down=Down,pad:start=3,pad:y=2,pad:lb=1,pad:rb=Left Ctrl,pad:x=a,pad:lt=Left Shift;Left:Left,Right:Right,Up:Up,Down:Down,Fire:Space,1:1,2:2,3:3,4:4,A:a,Enter:Return,Stop:Left Ctrl,Esc:Escape;menu: 1 rotacni ovladani, 2 prime ovladani, 3 start, 4 demo (v 3. dile trenink), hra: sipky a mezernik (strelba), Ctrl = STOP (pauza), Shift+Ctrl = konec hry, zadani inicialu: pismeno A;PR;Plosinovky/MTRON
@@ -138,10 +138,10 @@ ON-DUCH4;1;MGLD 00;Left=End,Right=PageDown,Up=W,Down=Z,Return=S,Space=S,pad:up=w
 OSTROV;2;ROM basic2.rmm, FONT, TYPE LOAD 1, TYPE RUN;Left=F10,Right=F12,E=F8,Z=F11,Up=F8,Down=F11,Space=F1,Left Shift=F2;Left:F10,Right:F12,Up:F8,Down:F11,K0:F1,K1:F2,Esc:Escape;pohyb: sipky, F1 lano, F2 prak;P;Plosinovky
 PAMPUCH;1;MGLD 01;Left=End,Right=PageDown,Up=W,Down=Z,Return=S,Space=S,pad:up=w,pad:down=z,pad:left=End,pad:right=PageDown,pad:a=s,pad:start=s;Left:End,Right:PageDown,Up:W,Down:Z,H:h,S:s,Esc:Escape;H hrat, S nebo Space start, sipky;P;Plosinovky/PAMPUCH
 PAMPUCHX;1;MGLD 00;Up=W,Down=Z,Return=S,Space=S,pad:up=w,pad:down=z,pad:a=s,pad:start=s;Left:Left,Right:Right,Up:W,Down:Z,H:h,S:s,Esc:Escape;Pampuch a duch (255 zivotu): H hrat, K kopirovat, S start, sipky;P;Plosinovky/PAMPUCH
-PANGO;1;MGLD 00;;;Hungry Pango (D. Blasko): G hra, S ulozit;;Arkady
+PANGO;1;MGLD 00;Left=o,Right=p,Up=e,Down=d,Z=d,pad:y=g;Left:Left,Right:Right,Up:Up,Down:Down,Start:g,Esc:Escape;G hra, Enter po uvodnej strane, S ulozit, pohyb sipkami (O P E D), Keypad + (RCL) pauza, Space pokracovat;P;Arkady
 PAVUCI;2;ROM basic2.rmm, FONT, TYPE LOAD 40, TYPE RUN;Left=I,Right=P,Up=E,Down=Z,Return=N;E up:e,Y down:z,I left:i,P right:p,N jump:n,Esc:Escape;sipky = pohyb (E/Y/I/P), N = skok (podrzet), Space = start po uvodnej obrazovke;P;Plosinovky/HORACE
 PENETR;2;MGLD 03;Up=E,Down=Z,pad:x=F1,pad:y=Home;Up:E,Down:Z,Brake:Left,Fire:Right,Bomb:Space,Land:Home,Training:F1,Esc:Escape;E nahoru, Y dolu, sipka vpravo strelba, vlevo brzdeni, Space bomba (a start hry), Home pristani, F1 trenink;P;Strielacky
-PEXESO;2;MGLD 00;;;;;Deskove hry/PEXESO
+PEXESO;2;MGLD 00;pad:x=2;;;P;Deskove hry/PEXESO
 PEXESO-B;2;ROM basic2.rmm, FONT, TYPE LOAD 30, TYPE RUN;;;Enter start, cisla radku a sloupce karet z klavesnice;;Deskove hry/PEXESO
 PISQORKY;2;MGLD 00;;;zadani jmena;;Deskove hry|2 hraci
 POKLAD;2;ROM basic2.rmm, FONT, TYPE LOAD 1, TYPE RUN;Left=F10,Right=F12,E=F8,Z=F11,Up=F8,Down=F11,Space=F1,Left Shift=F2;Left:F10,Right:F12,Up:F8,Down:F11,K0:F1,K1:F2,Esc:Escape;pohyb: sipky, F1 akce;P;Plosinovky
@@ -162,16 +162,16 @@ SPACE-RA;1;MGLD 00;Return=s,Space=s,Up=a,pad:a=s,pad:b=s,pad:start=a;Left:Left,R
 SPINDIZZY;2A;MGLD 00;Up=Q,Down=A,Left=O,Right=P,Return=Space,pad:up=q,pad:down=a,pad:x=n,pad:y=m,pad:lb=s,pad:rb=h,pad:b=e;Up:Q,Down:A,Left:O,Right:P,Fire:Space,Freeze:N,Map:m,Pause:t,Score:s,Shape:c,K0:F1,K1:F2,K2:F3,K3:F4,Esc:Escape;Spindizzy: sipky, Space = start a zrychleni, N brzda, T pauza, M mapa, S skore (obtiznost, save, load), C tvar kulicky, F1-F4 otoceni pohledu, R zmena klaves, H napoveda;P;Plosinovky
 HIGHENC;2A;MGLD 00;Left=O,Right=P,Up=Q,Down=A,E=Q,Z=A,I=5,Return=Space;Left:O,Right:P,Fast:Q,Slow:A,Fire:Space,Hold:H,Start:5,Info:3,Esc:Escape;Highway Encounter (Vortex Software 1985, port RM-TEAM 2016, jen PMD 85-2A a 3): v menu 5 = start, 1 klavesnice, 2 joystick, 3 informace, 4 ukazka, O vlevo, P vpravo, Q rychle, A pomalu, Space palba, H drzet, T a C konec hry;P;Strielacky
 KUBANOID;1;MGLD 00;Left=O,Right=P,Up=Q,Down=A,E=Q,Z=A,I=S,Return=Space;Left:O,Right:P,Rotate up:Q,Rotate down:A,Drop:Space,Start:S,Esc:Escape;Kubanoid (Stardust 2025, port RM-TEAM a X-Agon 2026, logicka hra): menu S start, K klavesnice, J joystick, D definice klaves, F barvy, T terc, H hudba (MIF 85 neni), hra O vlevo, P vpravo, Q a A otaceni kostek, Space rychly pad;P;Logicke hry
-STRIPPED;1;MGLD 03;Z=D,Down=D,Up=E;Up:e,Down:d,Fire:Space,1:1,2:2,3:3,4:4,Esc:Escape;E hore, D dole, Space strelba, menu cisly 1 ovladani, 2 start hry, 4 konec, 5 smazat rekord (po G chvili pocka na titulce);;Strielacky
+STRIPPED;1;MGLD 03;Z=D,Down=D,Up=E,Return=Space,pad:y=g,pad:x=2;Up:e,Down:d,Fire:Space,1:1,2:2,3:3,4:4,Esc:Escape;E hore, D dole, Space strelba, menu cisly 1 ovladani, 2 start hry, 4 konec, 5 smazat rekord (po G chvili pocka na titulce);P;Strielacky
 T.MRAVEC;2;ROM basic2.rmm, FONT, TYPE LOAD 52, TYPE RUN;;;Toci-Mravec: velikost desky 4 az 8 (cislo), potom prikazy z klavesnice;;Programovani/MRAVEC
 TANK;1;MGLD 00, JUMP 2000;;;;;2 hraci
 TANKY;2;ROM basic2.rmm, FONT, TYPE LOAD 53, TYPE RUN;E=F2,Z=F1,Up=F2,Down=F1,Return=F4,Space=F4;Down:F1,Up:F2,Fire:F4,Esc:Escape;F1 dolu, F2 nahoru, F4 palba (K0, K1, K3), pak libovolna klavesa;PR;2 hraci
 TAVA;2;ROM basic2.rmm, FONT, TYPE LOAD 5, TYPE RUN;;;text hra: F1 ano, F2 ne (instrukce), prikazy z klavesnice;;Textove adventury
 TENISS;2;MGLD 00, JUMP 7000;;1:1,2:2,3:3,P1 Q:q,P1 A:a,P1 Z:z,P1 X:x,P2 /:/,P2 .:.,P2 End:End,P2 5:Keypad 5,Esc:Escape;nejdriv 1/2/3, hrac1 Q A Z X, hrac2 / . End Num5;;2 hraci
-TETRIS;2;MGLD 03;;;;;Logicke hry
+TETRIS;2;MGLD 03;pad:x=2,pad:start=0;;;P;Logicke hry
 TINYBASIC;1;MGLD 01, JUMP 0000;;;TINY BASIC 1.0 (Li-Chen Wang 1976, port Libor L.A. 2018, verze 1.01 pro PMD 85-1): cela cisla, prikazy LIST LOAD n NEW RUN SAVE CLS, LOAD 3 az 13 nacte ukazky z pasky (3 napoveda, 4 prime prikazy, 5 PRINT, 6 FOR NEXT, 7 IF, 8 GOSUB, 9 pole, 10 INPUT, 11 RND, 12 BOOLEAN, 13 Eratosthenes), Enter potvrzuje, Backspace nebo sipka vlevo maze;;Programovani/TINYBASIC
 TINYBASIC-2;2;MGLD 02, JUMP 0000;;;TINY BASIC 1.0 (Li-Chen Wang 1976, port Libor L.A. 2018, verze 1.02 pro PMD 85-2 a vyssi): cela cisla, prikazy LIST LOAD n NEW RUN SAVE CLS, LOAD 3 az 13 nacte ukazky z pasky (3 napoveda, 4 prime prikazy, 5 PRINT, 6 FOR NEXT, 7 IF, 8 GOSUB, 9 pole, 10 INPUT, 11 RND, 12 BOOLEAN, 13 Eratosthenes), Enter potvrzuje, Backspace nebo sipka vlevo maze;;Programovani/TINYBASIC
-VIDEOSTP;2;ROM basic2.rmm, FONT, TYPE LOAD 11, TYPE RUN;;;F1 (K0) zastavi kostky, Enter, jmeno z klavesnice;;Arkady
+VIDEOSTP;2;ROM basic2.rmm, FONT, TYPE LOAD 11, TYPE RUN;Space=F1,pad:a=F1;;F1 (K0) zastavi kostky, Enter, jmeno z klavesnice;P;Arkady
 VOTRELCI;2;ROM basic2.rmm, FONT, TYPE LOAD 0, TYPE RUN;E=F1,Z=F2,Up=F1,Down=F2,Return=Space,Left=F9,Right=F9,pad:a=F9,pad:b=F9,pad:x=1,pad:y=0,pad:start=Space;Up:Up,Down:Down,Fire:Left,Start:Return,Esc:Escape;F1 zbran nahoru, F2 dolu, F9 vystrel, mezernik start, pri konci 1 nebo 0;P;Strielacky
 WILLY;1;MGLD 00;Left=P,Up=Space,Down=m,Return=Space,pad:up=Space,pad:down=m;Left:Left,Right:Right,Jump:Space,Esc:Escape;sipky vlevo/vpravo, Space nebo sipka nahoru = skok a start;PR;Plosinovky/WILLY
 WURMI;2;ROM basic2.rmm, FONT, TYPE LOAD 7, TYPE RUN;Left=F1,Right=F4,Up=F3,Down=F2,E=F3,Z=F2;Left:F1,Down:F2,Up:F3,Right:F4,Esc:Escape;F1 vlevo, F2 dole, F3 nahoru, F4 vpravo (K0-K3), pak libovolna klavesa;PR;Arkady
@@ -184,13 +184,13 @@ ZOFKA2T;2;ROM basic2.rmm, FONT, TYPE LOAD 11, TYPE RUN;;;Zofka s prikazem pro ti
 ZOFKA3;2;MGLD 00, JUMP 0003;;;korytnacka Zofka v strojovem kodu (verze 2.2): prikazy z klavesnice, potvrzeni Enter;;Programovani/ZOFKA
 DIZZY;2;MGLD 00, SHIFT, NOBLINK;Space=Left Shift,E=Return,pad:up=Up;Left:Left,Right:Right,Space jump:Space,E action:e,Esc:Escape;Magicland Dizzy (PMD 85-2A/3, cb verze bez hudby): sipky = pohyb, mezernik = skok/start, E = akce/zvednout;P;Plosinovky
 DIKTATOR;2A;MGLD 00, JUMP 0000;;;Diktator (Don Priestley, DK Tronics 1983, preklad Frantisek Fuka, port ZX Spectrum hry pro PMD 85-2A a 3 s ColorACE): uvod trva asi minutu, pak libovolna klavesa, dale klavesnice, ColorACE (barvy) neni emulovan;;Logicke hry
-JETPAC;1;MGLD 01;;;Jetpac: v menu 3 = klavesnice, 4 = joystick (sipky + mezernik), 5 = start, 7 = nastaveni klaves;;Plosinovky
-PSSST;1;MGLD 02;;;Pssst: v menu 3 = klavesnice, 5 = start, 7 = nastaveni klaves;;Plosinovky
+JETPAC;1;MGLD 01;pad:x=4,pad:y=5;;Jetpac: v menu 3 = klavesnice, 4 = joystick (sipky + mezernik), 5 = start, 7 = nastaveni klaves;P;Plosinovky
+PSSST;1;MGLD 02;pad:x=4,pad:y=5;;Pssst: v menu 3 = klavesnice, 5 = start, 7 = nastaveni klaves;P;Plosinovky
 ARKANOID;1;MGLD 04;Return=Space;Left:Left,Right:Right,Space:Space,Esc:Escape;sipky vlevo/vpravo = palka, Space = start a odpal micku, na tabulce neprepinat J (ovladac);PR;Arkady/ARKANOID
 ARKANOID-S;1;MGLD 04, POKE 355F 00, POKE 3560 00, POKE 3561 00, POKE 357D 00, POKE 357E 00, POKE 357F 00;Return=Space;Left:Left,Right:Right,Space:Space,Esc:Escape;sipky vlevo/vpravo = palka, Space = start a odpal micku, na tabulce neprepinat J (ovladac) (upraveno: palka zrychluje stejne vlevo i vpravo);PR;Arkady/ARKANOID
 TREAISLA;1;MGLD 05;Left=O,Right=P,Up=Q,Down=A,Space=M,Return=S,pad:up=q,pad:down=a;Up:Up,Down:Down,Left:Left,Right:Right,M hod mece/skok:Space,S start:s,H pauza:h,T pokracovat:t,Esc:Escape;S = start, pak M nebo Space (PRESS FIRE), sipky = pohyb, M nebo Space = hod mece/skok, H pauza, T pokracovat, F1 = zvuk;P;Plosinovky
-TRAILBLA;1;MGLD 06;;;Enter = hra, I informace, B barvy, H hudba, J joystick (jen klavesnice);;Arkady
-JSWILLY;1;MGLD 08, JOYONLY;;;Jet Set Willy: v menu 3 = start, 1 = ovladani (jen klavesnice);;Plosinovky
+TRAILBLA;1;MGLD 06;;Left:Left,Right:Right,Up:Up,Down:Down,Start:Return,Esc:Escape;Enter = hra, I informace, B barvy, H hudba, J joystick (jen klavesnice);PR;Arkady
+JSWILLY;1;MGLD 08, JOYONLY;pad:x=3;;Jet Set Willy: v menu 3 = start, 1 = ovladani (jen klavesnice);P;Plosinovky
 FFRUITS;1;MGLD 09;;;Enter = nova hra, Keypad + (RCL) = redefinice klaves, Ctrl (STOP) = menu, 1-4 nastaveni (jen klavesnice);;Logicke hry
 MAGICIAN;1;MGLD 0A;Left=O,Right=P,Up=Q,Down=A,Space=M,pad:start=1,pad:y=2,pad:x=3,pad:lb=4;Q up:q,A down:a,O left:o,P right:p,M akce:m,1:1,2:2,3:3,4:4,RCL konec hry:Keypad +,Esc:Escape;v menu 1 = start, 2 = obtiznost, 3 = ovladani (QAOPM, JOY-A, JOY-B), 4 = zvuk, hra: Q/A/O/P a M, skok = hore spolu s vlavo nebo vpravo, RCL (Tab nebo Num+) = konec hry, pak M;P;Plosinovky
 FLAPPY2K;1;MGLD 0B;Up=E,Down=Z;E up:e,Y down:z,Left:Left,Right:Right,Space:Space,Enter:Return,G:g,P:p,S:s,Stop:Left Ctrl,Esc:Escape;menu G = hra (vyber sceny: sipky a Space), P = heslo, S = nastaveni, ve hre sipky = pohyb, Space = ohen, Stop (Ctrl) = zpet;P;Logicke hry/FLAPPY
@@ -199,20 +199,20 @@ EVIDENCE;1;MGLD 00, TAPESAVE, TAPEAUTOREWIND;;;EVIDENCE: adresa a datum Enter, j
 EVIDEDIT;1;MGLD 00, TAPESAVE EVIDENCE;;;EVIDEDIT: nazvy souboru a polozek, nova data pro EVIDENCE (ulozi se na magnetofon do saves/EVIDENCE), jen klavesnice;;Programy/Databaza
 K-STUDIO;2;MGLD 01;;;graficky editor K-STUDIO (nic se neuklada, bez mysi);;Programy/Grafika
 GR;2;MGLD 00;;;graficky editor GR (nic se neuklada, bez mysi);;Programy/Grafika
-FLAPPY-V1;1;MGLD 03;Up=E,Down=Z;E up:e,Y down:z,Left:Left,Right:Right,Space:Space,Enter:Return,H:h,I:i,Shift:Left Shift,RCL:Keypad +,Stop:Left Ctrl,F1:F1,Esc:Escape;E/Y nahoru/dolu, Space = hod, F1 = konec, Stop (Ctrl) = reset, kody jen klavesnici;;Logicke hry/FLAPPY
-PONTRIS;1;MGLD 00;;;F1 hra, F2 info, F3 tabulka, F4 barevne, F5 zmena ovladani, F6 editace, F7 ulozit;;Logicke hry/PONTRIS
-PONTRIS2;1;MGLD 00;;;F1 hra, F2 info, F3 tabulka, F4 barevne, F5 zmena ovladani, F6 editace, F7 ulozit;;Logicke hry/PONTRIS
-SMYCKY;1;MGLD 00;;;F1 hra, F2 info, F3 tabulka, F4 cernobile, F5 zmena ovladani, F6 ulozit;;Logicke hry
+FLAPPY-V1;1;MGLD 03;Up=E,Down=Z;E up:e,Y down:z,Left:Left,Right:Right,Space:Space,Enter:Return,H:h,I:i,Shift:Left Shift,RCL:Keypad +,Stop:Left Ctrl,F1:F1,Esc:Escape;E/Y nahoru/dolu, Space = hod, F1 = konec, Stop (Ctrl) = reset, kody jen klavesnici;P;Logicke hry/FLAPPY
+PONTRIS;1;MGLD 00;Return=Space,pad:start=F1;Left:Left,Right:Right,Up:Up,Down:Down,Start:F1,Swap:Space,Esc:Escape;F1 hra, F2 info, F3 tabulka, F4 barevne, F5 zmena ovladani, F6 editace, F7 ulozit;P;Logicke hry/PONTRIS
+PONTRIS2;1;MGLD 00;Return=Space,pad:start=F1;Left:Left,Right:Right,Up:Up,Down:Down,Start:F1,Swap:Space,Esc:Escape;F1 hra, F2 info, F3 tabulka, F4 barevne, F5 zmena ovladani, F6 editace, F7 ulozit;P;Logicke hry/PONTRIS
+SMYCKY;1;MGLD 00;Return=F1,pad:start=F1;Left:Left,Right:Right,Up:Up,Down:Down,Start:Return,Esc:Escape;F1 hra, F2 info, F3 tabulka, F4 cernobile, F5 zmena ovladani, F6 ulozit;PR;Logicke hry
 BOULD+4;1;MGLD 03;Return=H,Space=H,Up=E,Down=Z;E up:e,Y down:z,Left:Left,Right:Right,H:h,Esc:Escape;H hra, I informace, sipky vlevo/vpravo, E/Y nahoru/dolu (pad a TV: OK = H);PR;Arkady/BOULDER
-MANIC23C;1;MGLD 03;Space=Left Shift,Up=@Left Shift,Down=A;Left:Left,Right:Right,Jump:Left Shift,Jump left:Left Shift&Left,Jump right:Left Shift&Right,Enter:Return,H:h,0:0,Esc:Escape;H hra (menu cheatu: 1-5 volby, 0 spusti hru, Enter = start), sipky, skok: Shift nebo sipka nahoru;;Plosinovky/MANIC
-PEXESO2;2;MGLD 00;;;menu: 1 hra dvou hracu, 2 proti pocitaci, 3 klavesy, 4 ukazka, 5 konec;;Deskove hry/PEXESO
+MANIC23C;1;MGLD 03;Space=Left Shift,Up=@Left Shift,Down=A,E=@Left Shift,Z=A,pad:y=0;Left:Left,Right:Right,Jump:Left Shift,Jump left:Left Shift&Left,Jump right:Left Shift&Right,Enter:Return,H:h,0:0,Esc:Escape;H hra (menu cheatu: 1-5 volby, 0 spusti hru, Enter = start), sipky, skok: Shift nebo sipka nahoru;P;Plosinovky/MANIC
+PEXESO2;2;MGLD 00;pad:x=2;;menu: 1 hra dvou hracu, 2 proti pocitaci, 3 klavesy, 4 ukazka, 5 konec;P;Deskove hry/PEXESO
 WILLY2;2;MGLD 00, JUMP 0000;Left=Keypad 5,Up=Space,Down=m,Return=Space,pad:up=Space,pad:down=m;Left:Left,Right:Right,Jump:Space,Esc:Escape;sipky vlevo/vpravo, Space nebo sipka nahoru = skok a start;PR;Plosinovky/WILLY
-KVADRO;1;MGLD 00;;;menu: S start (K klavesnice, J joystick, R redefinice, F barvy);;Logicke hry/KVADRO
-KVADRO.E;1;MGLD 00;;;menu: S start (K klavesnice, J joystick, R redefinice, F barvy);;Logicke hry/KVADRO
-PLOTTING;1;MGLD 00;;;menu: 1 klavesnice, 2 joystick, 3 monochrom, 5 start (po vyberu 1);;Logicke hry
-GAME2048;1;MGLD 00;;;S start, C barvy, hra sipkami (jen klavesnice);;Logicke hry
-SOLITER;1;MGLD 00;;;sipky = kurzor (mys), Space/Enter = klik, Informace a Zacit hrat;;Deskove hry
-ATOMIX;1;MGLD 00;;;menu: 1 start, 2 klavesy, 3 barvy, hra Q/A/O/P, Space = akce, EOL napoveda, R znovu, 0 konec;;Logicke hry
-TVARE;1;MGLD 00, TAPELOOP;;;menu: 1 klavesnice, 2 joystick, 3 barvy, pak 0 = start;;Logicke hry
+KVADRO;1;MGLD 00;Left=o,Right=p,Up=q,Down=a,E=q,Z=a,Return=s,pad:start=s;;menu: S start (K klavesnice, J joystick, R redefinice, F barvy);PR;Logicke hry/KVADRO
+KVADRO.E;1;MGLD 00;Left=o,Right=p,Up=q,Down=a,E=q,Z=a,Return=s,pad:start=s;;menu: S start (K klavesnice, J joystick, R redefinice, F barvy);PR;Logicke hry/KVADRO
+PLOTTING;1;MGLD 00;pad:x=1,pad:start=5;;menu: 1 klavesnice, 2 joystick, 3 monochrom, 5 start (po vyberu 1);P;Logicke hry
+GAME2048;1;MGLD 00;Return=s,pad:start=s;Left:Left,Right:Right,Up:Up,Down:Down,Start:Return,Esc:Escape;S nebo Enter start, hra sipkami;PR;Logicke hry
+SOLITER;1;MGLD 00;Return=Space;Left:Left,Right:Right,Up:Up,Down:Down,Click:Return,Esc:Escape;sipky = kurzor (mys), Space/Enter = klik, Informace a Zacit hrat;P;Deskove hry
+ATOMIX;1;MGLD 00;Left=o,Right=p,Up=q,Down=a,E=q,Z=a,pad:start=1,pad:y=r;;menu: 1 start, 2 klavesy, 3 barvy, hra sipky (Q/A/O/P), Space = akce, EOL napoveda, R znovu, 0 konec;P;Logicke hry
+TVARE;1;MGLD 00, TAPELOOP;pad:x=1,pad:start=0;;menu: 1 klavesnice, 2 joystick, 3 barvy, pak 0 = start;P;Logicke hry
 LEMMINGS;1;MGLD 00, TAPELOOP;;;menu: S start, N nastaveni, I informace, H heslo, hra: kurzor sipkami, F1-F12 (K0-K11) = volba cinnosti, Space, dalsi sektory se nahravaji z pasky;;Logicke hry
-DOOM85;1;MGLD 00, JUMP 0100;Up=E,Down=Z,Return=Space,pad:x=1,pad:y=2;E forward:e,Y back:z,Left:Left,Right:Right,Fire:Space,Knife:1,Pistol:2,M music:m,Esc:Escape;Doom85 (raycaster v assembleru 8080, pohled z prvni osoby): na titulce zvolte obtiznost (1 az 5 nebo E a Y a mezernik), E chodi dopredu, Y dozadu, sipky vlevo a vpravo otaceji, carka a tecka (, .) delaji ukrok vlevo a vpravo, mezernik strili, 1 nuz (nizka ucinnost, jen zblizka, bez naboju), 2 pistole, M zapina hudbu, STOP (Ctrl) ukonci level a vrati na titulku, od druhe urovne priserky strelci strili ohnive koule po prime care, priserky chodi po chodbach a honi vas, v bludisku jsou balicky naboju;;Arkady
+DOOM85;1;MGLD 00, JUMP 0100;Up=E,Down=Z,Return=Space,pad:x=1,pad:y=2;E forward:e,Y back:z,Left:Left,Right:Right,Fire:Space,Knife:1,Pistol:2,M music:m,Esc:Escape;Doom85 (raycaster v assembleru 8080, pohled z prvni osoby): na titulce zvolte obtiznost (1 az 5 nebo E a Y a mezernik), E chodi dopredu, Y dozadu, sipky vlevo a vpravo otaceji, carka a tecka (, .) delaji ukrok vlevo a vpravo, mezernik strili, 1 nuz (nizka ucinnost, jen zblizka, bez naboju), 2 pistole, M zapina hudbu, STOP (Ctrl) ukonci level a vrati na titulku, od druhe urovne priserky strelci strili ohnive koule po prime care, priserky chodi po chodbach a honi vas, v bludisku jsou balicky naboju;P;Arkady
