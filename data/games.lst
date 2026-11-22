@@ -54,7 +54,7 @@ BOMBARDE;2;ROM basic2.rmm, FONT, KEYHOLD 170, TYPE LOAD 2, TYPE RUN;Space=F1,Lef
 BOULD+3;2;MGLD 03;Return=H,Space=H,Up=E,Down=Z;E up:e,Y down:z,Left:Left,Right:Right,H:h,Esc:Escape;H hra, I informace, sipky vlevo/vpravo, E/Y nahoru/dolu (pad a TV: OK = H);PR;Arkady/BOULDER
 BOULDER;1;MGLD 03;Return=H,Space=H,Up=E,Down=Z;E up:e,Y down:z,Left:Left,Right:Right,H:h,Esc:Escape;H hra, I informace, sipky vlevo/vpravo, E/Y nahoru/dolu (pad a TV: OK = H);PR;Arkady/BOULDER
 BUBLSORT;2;ROM basic2.rmm, FONT, TYPE LOAD 0, TYPE RUN;;;ukazka trideni: Enter pokracuje;;Naucne
-CATEGORI;1;MGLD 0B, JUMP 1000;;;Categoric (M. Urda): LEFT = ->, RIGHT = <-, FIRE = K0 (F1), libovolna klavesa start;;Strielacky
+CATEGORI;1;MGLD 0B, JUMP 1000;Space=F1,Return=F1,pad:a=F1,pad:b=F1;Left:Left,Right:Right,Fire:F1,Esc:Escape;Categoric (M. Urda): sipky vlevo/vpravo, F1 nebo Space = strelba, libovolna klavesa start;PR;Strielacky
 COBRA;1;MGLD 05, JUMP 5B00;Left=End,Right=PageDown,Up=A,Down=Left Shift,E=A,Z=Left Shift,H=1,I=2,Keypad +=3,Return=Keypad 5;Left:Left,Right:Right,Up:Up,Down:Down,1:1,2:2,3:3,Space:Space,Stop:Keypad 5,Esc:Escape;mezernik hra, 1 2 3 rychlost, sipky vlevo/vpravo, A nahoru, Shift dolu, Num 5 stop. Start: 1, vlevo a HNED dolu (uzka kapsa);P;Strielacky
 COSMIC;2;ROM basic2.rmm, FONT, TYPE LOAD 1, TYPE RUN;Left=F10,Right=F12,Space=F11,pad:a=F11;Left:F10,Right:F12,K10:F11,Esc:Escape;pohyb: sipky vlevo/vpravo, mezernik = akce, Enter na zacatku (pad: D-pad vlevo/vpravo, A = akce, B = Enter);P;Plosinovky
 CROSFIRE;1;MGLD 00, JUMP 0000, POKE 39A4 01;;;Crossfire: libovolna klavesa start;;Strielacky/CROSSFIRE
