@@ -57,10 +57,10 @@ CEC = can it be played with the TV remote (cursor keys, OK, Back; no letters or 
 | HLIPA | nie | nie | po štarte žiada presný čas z klávesnice |
 | ROBINSON | nie | nie | uhol výstrelu číslom a Enter |
 | LEMMINGS | nie | nie | 12 volieb F1–F12 plus kurzor, na pad príliš veľa |
-| TANK | neurčené | nie | ovládanie sa definuje klávesou D, v teste hra nereagovala |
-| CROSFIRE | neurčené | nie | 8 smerov (pohyb a streľba), predvolené klávesy som nezistil |
-| CROSSI | neurčené | nie | ako CROSFIRE, ovládanie v menu M |
-| LAVICKA | neurčené | nie | F1/F2/F9/F10 ako smery, odpovede ANO/NIE; neskúšané |
+| TANK | nie | nie | iba klávesnica (potvrdil používateľ) |
+| CROSFIRE | ano | nie | pohyb I K J L (D-pad), streľba R D S F (Y hore, A dole, X vľavo, B vpravo); CEC nemá čím strieľať do 4 smerov |
+| CROSSI | ano | nie | ako CROSFIRE, G štart (pad: Start) |
+| LAVICKA | ano | nie | úvod: „Hrali ste už?" N (pad: X) + Enter, rekord 0 (pad: Y) + Enter; skoky D-pad (F1, F2, F9, F10) |
 | REVERZ-MC | neurčené | nie | Othello v strojovom kóde, neskúšané |
 | FFRUITS | neurčené | nie | klávesy sa definujú cez RCL, v teste hra na pad nereagovala |
 | SABOTER | nie | nie | potrebuje klávesnicu (menu a nastavenie ovládania) |
