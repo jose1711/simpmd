@@ -4,7 +4,8 @@
 
 ## The list
 
-The menu shows four games with logos. [Up] or [E] (gamepad up) opens the list of all games from `games.lst`
+The menu shows the favorite games (the first start: FLAPPY, BOULDER, MANIC+ and FRED) with their pictures, see
+[Favorites](#favorites). [Up] or [E] (gamepad up) opens the list of all games from `games.lst`
 in the share directory. `simpmd/data/games.lst` lists the tapes of `simpmd/data/tapes` that work, according to the
 table in `simpmd/README`.
 
@@ -13,7 +14,33 @@ table in `simpmd/README`.
 | [Up] / [Down] or [E] / [Y] | select |
 | [Left] / [Right] | move by a page |
 | [Enter] | start |
+| [Enter] (hold it) | popup menu: Spusti, Pridat do oblibenych / Odebrat z oblibenych |
 | [Esc] (hold it) | back to the menu |
+
+A star after the name marks a favorite.
+
+## Favorites
+
+The main menu shows four favorites on a page (a "Strana 1/2" at the bottom right when there are more, [Left] / [Right]
+move over the pages). Hold [Enter] (the OK button of the TV remote control) on a game for 0.8 s and a popup menu opens:
+
+- in the list: `Spusti` and `Pridat do oblibenych` (`Odebrat z oblibenych` for a game that is already one),
+- in the main menu: `Spusti` and `Odebrat z oblibenych`.
+
+[Up] / [Down] choose, [Enter] confirms, [Esc] closes the popup menu at once. A short press of [Enter] starts the game as
+before. When the last favorite is removed, the main menu tells how to add one.
+
+- The names are saved one per line in `favorites.lst` in the directory of the saved states (`PMD_STATEDIR`, see
+  [usage.md](usage.md#saved-state)); `PMD_FAVORITES=<file>` uses another file. Without the file the four games above are
+  the favorites. Games that are no longer in `games.lst` are skipped.
+- The picture of a game is the logo of the first four games (BOULD+3 has the one of BOULDER), otherwise
+  `screenshots/<name>.png` in the share directory (174x174, 1 bit; `deploy.sh` installs `simpmd/data/screenshots`). Like the
+  logos, it is a small window of the screen of the game (58x58 or 87x87 pixels of the PMD 85, magnified 3x or 2x with sharp
+  pixels) that shows the player character or the pieces of the game and no text. Games that show only text or a title
+  (adventures, MTRON, MUR, TETRIS...) have no picture, they show a frame with their name.
+- A thumbnail of a new game: `PMD_SCREENSHOT=<file>` writes a BMP of the game, add a line `NAME X Y SCALE` (the corner
+  of the window on the 288x256 screen and the magnification 1, 2 or 3) to `simpmd/data/screenshots/thumbs.lst` and run
+  `simpmd/data/screenshots/make-thumbs.sh <directory of the BMPs> NAME` (needs ImageMagick).
 
 After the start the emulator types the commands itself: `MGLD 00` and, for `MGLD 00, JUMP 2000`, the `JUMP` once
 the tape stops loading, so selecting a game is enough. `PMD_AUTOLOAD=0` turns it off (type the commands by hand).
@@ -30,6 +57,10 @@ it later does not help, the load takes 15 s with it.
 `NOJOY` in the note: the joystick ports always read 0xFF, the cursor keys, Space and the pad do not reach the program as a joystick. For a game that polls the joystick all the time, also when the keyboard is chosen (DIZZY, FRED, HORAC and MANIC-2 do), and takes the same key twice (as the joystick and as the keyboard). No game has it now: DIZZY gave the same result with and without it, the others were not compared.
 
 `JOYONLY` in the note (MTRON-1, -2, -3 and JSWILLY): while the program polls the joystick (the ports `0x4C`/`0x4D`; read within the last second), the cursor keys and Space (and the pad inputs mapped to them) go only to the emulated joystick, not to the keyboard matrix. JSWILLY needs it: Space on the keyboard is its pause, so the joystick fire button paused the game when it was not held together with a direction.
+
+`BEEPSLOW` in the note makes the notes the game plays with the beep routine of the monitor as long as with the ROM of
+the PMD 85-2/2A (its delay loop is 87 clocks a round, the model 1 one 15): the hits of INVADERS then sound as in GPMD85.
+`PMD_BEEPSLOW=0/1` overrides it for every game.
 
 `NOBLINK` in the note ignores the blink bit of the video memory (bit 7) in the picture and in the web remote. Magicland
 Dizzy (for the PMD 85-2A/3) sets the bit on large areas, probably as a color that this emulator cannot show, and the

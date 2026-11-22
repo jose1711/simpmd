@@ -41,6 +41,8 @@ limitations under the License.
 
 /// Maximal size of the request head.
 #define PMD_WEB_REQUEST_MAX     4096
+/// Time a client has to send the request head [ms].
+#define PMD_WEB_REQUEST_MS      3000
 
 static std::thread oThread;
 static std::atomic <bool> bRunning (false);
@@ -70,6 +72,8 @@ const T = new URLSearchParams(location.search).get('t') || '';
 const q = p => p + (p.includes('?') ? '&' : '?') + 't=' + encodeURIComponent(T);
 const cv = document.getElementById('c'), cx = cv.getContext('2d'), img = cx.createImageData(288, 256);
 let mode = 'menu';
+// The names of the games are text, not HTML.
+const esc = t => String(t).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
 
 async function screen() {
   try {
@@ -99,12 +103,12 @@ async function state() {
     const m = document.getElementById('menu');
     if (s.mode === 'game') { m.textContent = ''; }
     else if (s.mode === 'menu') {
-      m.innerHTML = 'Menu: ' + s.featured.map((n, i) => i === s.index ? '<span class="sel"> ' + n + ' </span>' : ' ' + n + ' ').join('') +
+      m.innerHTML = 'Menu: ' + s.featured.map((n, i) => i === s.index ? '<span class="sel"> ' + esc(n) + ' </span>' : ' ' + esc(n) + ' ').join('') +
         '\n[Left] [Right] select, [Enter] start, [E] list of all games';
     } else {
       const from = Math.max(0, Math.min(s.index - 7, s.games.length - 15));
       m.innerHTML = 'All games ' + (s.index + 1) + '/' + s.games.length + '\n' +
-        s.games.slice(from, from + 15).map((n, i) => from + i === s.index ? '<span class="sel"> ' + n + ' </span>' : ' ' + n).join('\n');
+        s.games.slice(from, from + 15).map((n, i) => from + i === s.index ? '<span class="sel"> ' + esc(n) + ' </span>' : ' ' + esc(n)).join('\n');
     }
   } catch (e) {}
   setTimeout(state, 400);
@@ -222,14 +226,18 @@ static void WEBRespond (int iClient, int iCode, const char *pType, const std::st
  */
 static void WEBHandle (int iClient)
 {
+  // A client that sends or reads slowly must not hold the only server thread (and the exit of the emulator, which
+  // waits for it): every receive and send has a timeout and the whole request head a deadline.
   struct timeval sTimeout = {2, 0};
   setsockopt (iClient, SOL_SOCKET, SO_RCVTIMEO, &sTimeout, sizeof (sTimeout));
+  setsockopt (iClient, SOL_SOCKET, SO_SNDTIMEO, &sTimeout, sizeof (sTimeout));
+  Uint32 iDeadline = SDL_GetTicks () + PMD_WEB_REQUEST_MS;
   std::string sRequest;
   char acBuffer [512];
   while (sRequest.find ("\r\n\r\n") == std::string::npos && sRequest.size () < PMD_WEB_REQUEST_MAX)
   {
     ssize_t iRead = recv (iClient, acBuffer, sizeof (acBuffer), 0);
-    if (iRead <= 0)
+    if (iRead <= 0 || !bRunning || (Sint32) (SDL_GetTicks () - iDeadline) > 0)
       return;
     sRequest.append (acBuffer, iRead);
   }

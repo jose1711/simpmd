@@ -64,10 +64,7 @@ bool STSave (const std::string &sPath, int iModel)
 
   // The directory of the file (all levels, like mkdir -p), then write under a temporary name and rename, a failed save keeps
   // the old state.
-  size_t iSlash = sPath.rfind ('/');
-  if (iSlash != std::string::npos)
-    for (size_t iPos = sPath.find ('/', 1); iPos != std::string::npos && iPos <= iSlash; iPos = sPath.find ('/', iPos + 1))
-      mkdir (sPath.substr (0, iPos).c_str (), 0755);
+  SIMMakeDirs (sPath);
   std::string sTemp = sPath + ".tmp";
   FILE *pFile = fopen (sTemp.c_str (), "wb");
   if (!pFile)

@@ -48,6 +48,7 @@ limitations under the License.
 #include <iomanip>
 #include <iostream>
 #include <string>
+#include <sys/stat.h>
 #include <vector>
 
 #include <SDL2/SDL.h>
@@ -175,6 +176,7 @@ void CPUShutdown ();
 void DSPPaintHandler ();
 void DSPInvalidate ();
 void DSPSetNoBlink (bool);
+void CPUSetBeepSlow (bool);
 bool DSPNoBlink ();
 void DSPSaveScreenshot (const char *pPath);
 void DSPResizeHandler ();
@@ -186,10 +188,21 @@ void DSPMenuShutdown ();
 void DSPLogoShutdown ();
 
 void DSPRenderLogo (int screen_width, int screen_height);
-void DSPRenderText (int screen_width, int screen_height);
-void DSPRenderImage (int screen_width, int screen_height);
-void DSPRenderMenu (int screen_width, int screen_height, int index, const bool *abState);
-void DSPRenderGameList (int screen_width, int screen_height, int index, const std::string &sTitle, const std::vector <std::string> &oNames, const std::vector <std::string> &oNotes, const std::vector <std::string> &oInputs, const std::string &sHelp);
+/// A game of the main menu (a favorite): the name under the tile, the picture, the saved state icon.
+struct tMenuItem
+{
+  std::string sName;
+  std::string sImage;
+  bool bState;
+};
+
+void DSPRenderText (int screen_width, int screen_height, int index, const std::vector <tMenuItem> &oItems);
+void DSPRenderImage (int screen_width, int screen_height, int index, const std::vector <tMenuItem> &oItems);
+void DSPRenderMenu (int screen_width, int screen_height, int index, const std::vector <tMenuItem> &oItems);
+void DSPSetPopup (const std::string &sTitle, const std::vector <std::string> &oItems, int iSelected);
+void DSPClearPopup ();
+void DSPSaveMenuScreenshot (const char *pPath);
+void DSPRenderGameList (int screen_width, int screen_height, int index, const std::string &sTitle, const std::vector <std::string> &oNames, const std::vector <std::string> &oNotes, const std::vector <std::string> &oInputs, const std::string &sHelp, const std::string &sImage);
 
 byte KBDReadRow ();
 uint32 KBDScanCount ();
@@ -231,6 +244,7 @@ void SNDInitialize ();
 void SNDShutdown ();
 
 byte TAPReadData ();
+int TAPMsSinceRead ();
 void TAPWriteData (byte iData);
 byte TAPReadStatus ();
 void TAPInitialize ();
@@ -266,13 +280,23 @@ void TIMShutdown ();
 #undef DEBUG_CPU_TRACE_REGISTERS
 
 /// Executes a function and makes sure it returned 0.
-#define CheckZero(X) if (X) { assert (false); }
+#define CheckZero(X) do { if (X) { assert (false); } } while (0)
 /// Executes an SDL function and makes sure it returned 0.
-#define SDL_CheckZero(X) if (X) { DEBUG_LOG (SDL_GetError ()); assert (false); }
+#define SDL_CheckZero(X) do { if (X) { DEBUG_LOG (SDL_GetError ()); assert (false); } } while (0)
 /// Executes an SDL function and makes sure it returned TRUE.
-#define SDL_CheckTrue(X) if (!X) { DEBUG_LOG (SDL_GetError ()); assert (false); }
+#define SDL_CheckTrue(X) do { if (!(X)) { DEBUG_LOG (SDL_GetError ()); assert (false); } } while (0)
 /// Executes an SDL function and makes sure it did not return NULL.
-#define SDL_CheckNotNull(X) if ((X) == NULL) { DEBUG_LOG (SDL_GetError ()); assert (false); }
+#define SDL_CheckNotNull(X) do { if ((X) == NULL) { DEBUG_LOG (SDL_GetError ()); assert (false); } } while (0)
+
+/// Creates the directories of a file path, all levels (as mkdir -p of its directory).
+static inline void SIMMakeDirs (const std::string &sFile)
+{
+  size_t iLast = sFile.rfind ('/');
+  if (iLast == std::string::npos)
+    return;
+  for (size_t iPos = sFile.find ('/', 1) ; iPos != std::string::npos && iPos <= iLast ; iPos = sFile.find ('/', iPos + 1))
+    mkdir (sFile.substr (0, iPos).c_str (), 0755);
+}
 
 //--------------------------------------------------------------------------
 

@@ -40,6 +40,9 @@ limitations under the License.
 #include "sim_common.h"
 #include "SDL2/SDL_ttf.h"
 #include <map>
+#include <vector>
+#include <zlib.h>
+#include <math.h>
 
 
 //-------------------------------------------------------------------------------------------------------
@@ -58,13 +61,14 @@ limitations under the License.
 // HARDCODED DATA
 
 
-static const char *menuText[7] = {
+static const char *menuText[8] = {
   "PMD-85 Retro console",
   "1] Vyber hru pomoci sipek <- -> a stiskni [ Enter ].",
   "2] Hra se nahraje sama (prikaz MGLD se napise automaticky).",
   "3] Dalsi hry: sipka nahoru [ E ] otevre seznam vsech her.",
-  "4] Pro ukonceni hry stiskni [ Esc ].",
-  "5] Pro konec stiskni [ Esc ].",
+  "4] Podrz [ Enter ]: Spusti / Pridat do oblibenych.",
+  "5] Pro ukonceni hry stiskni [ Esc ].",
+  "6] Pro konec stiskni [ Esc ].",
   "Richard Bruna (c) 2019"
 };
 
@@ -72,15 +76,6 @@ static const char *menuText[7] = {
 static const char *creditsText = "Hry a programy: pmd85.borik.net";
 
 static const char *pmdLogo[1] = {PMD_SHARE "pmd85_830_570.bmp"};
-
-static const char *gameLogo[4] = {
-  PMD_SHARE "flappy.bmp",
-  PMD_SHARE "boulder.bmp",
-  PMD_SHARE "manic.bmp",
-  PMD_SHARE "fred.bmp"
-};
-
-static const char *gameText[4] = {"FLAPPY", "BOULDER", "MANIC", "FRED"};
 
 static const char *gameFont[1] = {PMD_SHARE "atari-classic.ttf"};
 
@@ -290,45 +285,6 @@ static void DSPPaintStats (bool bPainted, Uint32 iBegin, Uint32 iEnd)
 }
 
 
-/// Debug sampler for PMD_PADDLETRACE=1: left edge of the widest lit run in lines 208-215, logged to stderr on a change (every ~2 ms).
-static int DSPPaddleThread (void *pArgs)
-{
-  int iLast = -2;
-  for (;;)
-  {
-    const byte *pVideo = abMemoryData + PMD_VRAM_BASE;
-    bool abLit [PMD_VRAM_WIDTH * PMD_PIXEL_COUNT + 6];
-    memset (abLit, 0, sizeof (abLit));
-    for (int y = 208 ; y < 216 ; y ++)
-      for (int x = 0 ; x < PMD_VRAM_WIDTH * PMD_PIXEL_COUNT ; x ++)
-        if ((pVideo [y * (PMD_VRAM_WIDTH + PMD_VRAM_BLANK) + x / PMD_PIXEL_COUNT] >> (x % PMD_PIXEL_COUNT)) & 1)
-          abLit [x] = true;
-    int iEdge = -1;
-    for (int x = 17 ; x < 216 && iEdge < 0 ; x ++)
-      if (abLit [x])
-      {
-        int iEnd = x;
-        while (iEnd < PMD_VRAM_WIDTH * PMD_PIXEL_COUNT && abLit [iEnd]) iEnd ++;
-        if (iEnd - x >= 15) iEdge = x;
-        x = iEnd;
-      }
-    // ARKANOID variables: paddle x 1AD1, its speed 1AD2, width 1AD8, ball x 1B08, key bits 1B74 (see routine 0x35AC).
-    int iState = abMemoryData [0x1AD1] | abMemoryData [0x1AD2] << 8 | abMemoryData [0x1B08] << 16 | abMemoryData [0x1B74] << 24;
-    static int iLastState = -1;
-    if (iEdge != iLast || iState != iLastState)
-    {
-      int iCenter = (abMemoryData [0x1AD1] + 2 * abMemoryData [0x1AD8] + 0x0A) & 0xFF;
-      fprintf (stderr, "PD %u %d x=%d spd=%d ball=%d keys=%02x cf=%d\n", SDL_GetTicks (), iEdge, abMemoryData [0x1AD1],
-               (signed char) abMemoryData [0x1AD2], abMemoryData [0x1B08], abMemoryData [0x1B74], iCenter < abMemoryData [0x1B08]);
-      iLast = iEdge;
-      iLastState = iState;
-    }
-    SDL_Delay (2);
-  }
-  return (0);
-}
-
-
 /// Debug sampler for PMD_SCANTRACE=1: the moments the emulated program starts to scan the keyboard (bursts of row reads).
 static int DSPScanThread (void *pArgs)
 {
@@ -362,8 +318,6 @@ void DSPPaintHandler ()
 {
   static bool bScan = getenv ("PMD_SCANTRACE") && (SDL_CreateThread (DSPScanThread, "scan", NULL), true);
   (void) bScan;
-  static bool bPaddle = getenv ("PMD_PADDLETRACE") && (SDL_CreateThread (DSPPaddleThread, "paddle", NULL), true);
-  (void) bPaddle;
   Uint32 iPaintBegin = SDL_GetTicks ();
   // TODO Consider using HQX ?
 
@@ -392,16 +346,6 @@ void DSPPaintHandler ()
   bLastValid = true;
 
   int iCount = iLast - iFirst + 1;
-  static int bTrace = getenv ("PMD_PAINTTRACE") != NULL;
-  if (bTrace)
-  {
-    // Debug: leftmost lit pixel of lines 206-215 (the ARKANOID paddle) at the time of each painted frame.
-    int iMinX = -1;
-    for (int y = 206 ; y < 216 && iMinX < 0 ; y ++)
-      for (int x = 22 ; x < 206 ; x ++)
-        if ((pVideo [y * (PMD_VRAM_WIDTH + PMD_VRAM_BLANK) + x / 6] >> (x % 6)) & 1) { if (iMinX < 0 || x < iMinX) iMinX = x; break; }
-    fprintf (stderr, "PT %u %d\n", iPaintBegin, iMinX);
-  }
   DSPDecodeScreen (iFirst, iCount);
 
   // TODO Check if render clear is really needed ?
@@ -612,7 +556,12 @@ void DSPShutdown ()
  *  life of the menu renderer; PMD_PAINTSTATS=1 prints the time of a menu paint.
  */
 static std::map <std::string, SDL_Texture *> oTextCache;
-static SDL_Texture *apLogoCache [4];
+/// Textures of the pictures (logos and screenshots of the games) by file name, NULL for a file that can not be loaded.
+static std::map <std::string, SDL_Texture *> oImageCache;
+/// The popup menu over the menu or the list (empty: none), see DSPSetPopup.
+static std::string sPopupTitle;
+static std::vector <std::string> oPopupItems;
+static int iPopupSelected = 0;
 static TTF_Font *pFontCache = NULL;
 
 static void DSPMenuCacheClear ()
@@ -620,12 +569,10 @@ static void DSPMenuCacheClear ()
   for (std::map <std::string, SDL_Texture *>::iterator x = oTextCache.begin () ; x != oTextCache.end () ; ++ x)
     SDL_DestroyTexture (x->second);
   oTextCache.clear ();
-  for (int i = 0 ; i < 4 ; i ++)
-  {
-    if (apLogoCache [i])
-      SDL_DestroyTexture (apLogoCache [i]);
-    apLogoCache [i] = NULL;
-  }
+  for (std::map <std::string, SDL_Texture *>::iterator x = oImageCache.begin () ; x != oImageCache.end () ; ++ x)
+    if (x->second)
+      SDL_DestroyTexture (x->second);
+  oImageCache.clear ();
   if (pFontCache)
     TTF_CloseFont (pFontCache);
   pFontCache = NULL;
@@ -710,7 +657,182 @@ void DSPLogoShutdown ()
 }
 
 
-void DSPRenderText (int screen_width, int screen_height)
+/// Decodes a PNG file (not interlaced; 1, 2, 4 or 8 bit grey or palette, 8 bit RGB, grey+alpha or RGBA) into a surface.
+static SDL_Surface *DSPLoadPng (const char *pPath)
+{
+  FILE *pFile = fopen (pPath, "rb");
+  if (!pFile)
+    return (NULL);
+  std::vector <unsigned char> oFile;
+  unsigned char abBlock [4096];
+  for (size_t iRead ; (iRead = fread (abBlock, 1, sizeof (abBlock), pFile)) > 0 ; )
+    oFile.insert (oFile.end (), abBlock, abBlock + iRead);
+  fclose (pFile);
+  static const unsigned char abSignature [8] = {0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A};
+  if (oFile.size () < 33 || memcmp (&oFile [0], abSignature, 8) != 0)
+    return (NULL);
+
+  unsigned int iWidth = 0, iHeight = 0, iDepth = 0, iType = 0, iInterlace = 1;
+  std::vector <unsigned char> oData, oPalette;
+  for (size_t iPos = 8 ; iPos + 12 <= oFile.size () ;)
+  {
+    unsigned int iLength = (oFile [iPos] << 24) | (oFile [iPos + 1] << 16) | (oFile [iPos + 2] << 8) | oFile [iPos + 3];
+    const unsigned char *pChunk = &oFile [iPos + 8];
+    if (iLength > oFile.size () - iPos - 12)
+      return (NULL);
+    if (memcmp (pChunk - 4, "IHDR", 4) == 0 && iLength >= 13)
+    {
+      iWidth = (pChunk [0] << 24) | (pChunk [1] << 16) | (pChunk [2] << 8) | pChunk [3];
+      iHeight = (pChunk [4] << 24) | (pChunk [5] << 16) | (pChunk [6] << 8) | pChunk [7];
+      iDepth = pChunk [8];
+      iType = pChunk [9];
+      iInterlace = pChunk [12];
+    }
+    else if (memcmp (pChunk - 4, "PLTE", 4) == 0)
+      oPalette.assign (pChunk, pChunk + iLength);
+    else if (memcmp (pChunk - 4, "IDAT", 4) == 0)
+      oData.insert (oData.end (), pChunk, pChunk + iLength);
+    else if (memcmp (pChunk - 4, "IEND", 4) == 0)
+      break;
+    iPos += 12 + iLength;
+  }
+  // Samples per pixel by the colour type: grey 1, RGB 3, palette 1, grey+alpha 2, RGBA 4.
+  unsigned int iChannels = iType == 0 ? 1 : iType == 2 ? 3 : iType == 3 ? 1 : iType == 4 ? 2 : iType == 6 ? 4 : 0;
+  bool bSupported = iChannels > 0 && iInterlace == 0 && iWidth > 0 && iHeight > 0 && iWidth <= 4096 && iHeight <= 4096 &&
+                    (iDepth == 8 || ((iType == 0 || iType == 3) && (iDepth == 1 || iDepth == 2 || iDepth == 4)));
+  if (!bSupported || (iType == 3 && oPalette.size () < 3) || oData.empty ())
+    return (NULL);
+  size_t iBytesPerPixel = std::max <size_t> (1, iChannels * iDepth / 8);
+  size_t iStride = (iWidth * iChannels * iDepth + 7) / 8;
+  std::vector <unsigned char> oRaw ((iStride + 1) * iHeight);
+  uLongf iRawLength = oRaw.size ();
+  if (uncompress (&oRaw [0], &iRawLength, &oData [0], oData.size ()) != Z_OK || iRawLength != oRaw.size ())
+    return (NULL);
+
+  // Undo the row filters in place.
+  for (unsigned int iRow = 0 ; iRow < iHeight ; iRow ++)
+  {
+    unsigned char *pLine = &oRaw [iRow * (iStride + 1)];
+    unsigned char iFilter = pLine [0];
+    unsigned char *pCur = pLine + 1;
+    const unsigned char *pUp = iRow ? pLine - (iStride + 1) + 1 : NULL;
+    for (size_t i = 0 ; i < iStride ; i ++)
+    {
+      int iLeft = i >= iBytesPerPixel ? pCur [i - iBytesPerPixel] : 0;
+      int iAbove = pUp ? pUp [i] : 0;
+      int iUpLeft = pUp && i >= iBytesPerPixel ? pUp [i - iBytesPerPixel] : 0;
+      int iAdd = 0;
+      switch (iFilter)
+      {
+        case 0: break;
+        case 1: iAdd = iLeft; break;
+        case 2: iAdd = iAbove; break;
+        case 3: iAdd = (iLeft + iAbove) / 2; break;
+        case 4:
+        {
+          int iP = iLeft + iAbove - iUpLeft;
+          int iPa = abs (iP - iLeft), iPb = abs (iP - iAbove), iPc = abs (iP - iUpLeft);
+          iAdd = (iPa <= iPb && iPa <= iPc) ? iLeft : (iPb <= iPc) ? iAbove : iUpLeft;
+          break;
+        }
+        default: return (NULL);
+      }
+      pCur [i] = (unsigned char) (pCur [i] + iAdd);
+    }
+  }
+
+  SDL_Surface *pSurface = SDL_CreateRGBSurfaceWithFormat (0, iWidth, iHeight, 32, SDL_PIXELFORMAT_ARGB8888);
+  if (!pSurface)
+    return (NULL);
+  for (unsigned int iRow = 0 ; iRow < iHeight ; iRow ++)
+  {
+    const unsigned char *pLine = &oRaw [iRow * (iStride + 1) + 1];
+    Uint32 *pOut = (Uint32 *) ((unsigned char *) pSurface->pixels + iRow * pSurface->pitch);
+    for (unsigned int iCol = 0 ; iCol < iWidth ; iCol ++)
+    {
+      unsigned int iR, iG, iB, iA = 255;
+      if (iDepth < 8)
+      {
+        unsigned int iBit = iCol * iDepth;
+        unsigned int iValue = (pLine [iBit / 8] >> (8 - iDepth - iBit % 8)) & ((1 << iDepth) - 1);
+        if (iType == 3)
+        {
+          if (iValue * 3 + 2 >= oPalette.size ())
+            iValue = 0;
+          iR = oPalette [iValue * 3];
+          iG = oPalette [iValue * 3 + 1];
+          iB = oPalette [iValue * 3 + 2];
+        }
+        else
+          iR = iG = iB = iValue * 255 / ((1 << iDepth) - 1);
+      }
+      else
+      {
+        const unsigned char *pPixel = pLine + iCol * iChannels;
+        if (iType == 3)
+        {
+          unsigned int iIndex = pPixel [0] * 3 + 2 < oPalette.size () ? pPixel [0] : 0;
+          iR = oPalette [iIndex * 3];
+          iG = oPalette [iIndex * 3 + 1];
+          iB = oPalette [iIndex * 3 + 2];
+        }
+        else if (iType == 0 || iType == 4)
+        {
+          iR = iG = iB = pPixel [0];
+          if (iType == 4)
+            iA = pPixel [1];
+        }
+        else
+        {
+          iR = pPixel [0];
+          iG = pPixel [1];
+          iB = pPixel [2];
+          if (iType == 6)
+            iA = pPixel [3];
+        }
+      }
+      pOut [iCol] = (iA << 24) | (iR << 16) | (iG << 8) | iB;
+    }
+  }
+  return (pSurface);
+}
+
+
+/// Loads a picture, PNG or BMP by the extension of the file name.
+static SDL_Surface *DSPLoadPicture (const std::string &sPath)
+{
+  if (sPath.size () > 4 && sPath.compare (sPath.size () - 4, 4, ".png") == 0)
+    return (DSPLoadPng (sPath.c_str ()));
+  return (SDL_LoadBMP (sPath.c_str ()));
+}
+
+
+/// The texture of a picture (cached for the life of the menu), NULL if the file is missing or can not be decoded.
+static SDL_Texture *DSPPictureTexture (const std::string &sPath)
+{
+  std::map <std::string, SDL_Texture *>::iterator xFound = oImageCache.find (sPath);
+  if (xFound != oImageCache.end ())
+    return (xFound->second);
+  SDL_Texture *pTexture = NULL;
+  SDL_Surface *pSurface = DSPLoadPicture (sPath);
+  if (pSurface)
+  {
+    // Screenshots are scaled down, the linear filter keeps their thin lines.
+    SDL_SetHint (SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+    pTexture = SDL_CreateTextureFromSurface (mRenderer, pSurface);
+    SDL_SetHint (SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
+    SDL_FreeSurface (pSurface);
+  }
+  oImageCache [sPath] = pTexture;
+  return (pTexture);
+}
+
+
+/// Number of the tiles (favorite games) on a page of the main menu.
+#define MENU_TILES              4
+
+
+void DSPRenderText (int screen_width, int screen_height, int index, const std::vector <tMenuItem> &oItems)
 {
   TTF_Font *textFont = DSPMenuFont ();
   if (!textFont)
@@ -719,40 +841,70 @@ void DSPRenderText (int screen_width, int screen_height)
 
   // Credits and copyright
   DSPDrawText (textFont, creditsText, iX + (MENU_WIDTH - FONT_WIDTH * (int) strlen (creditsText))/2, 630);
-  DSPDrawText (textFont, menuText[6], iX + (MENU_WIDTH - FONT_WIDTH * (int) strlen (menuText[6]))/2, 665);
+  DSPDrawText (textFont, menuText[7], iX + (MENU_WIDTH - FONT_WIDTH * (int) strlen (menuText[7]))/2, 665);
   // About
   DSPDrawText (textFont, menuText[0], iX + (MENU_WIDTH - FONT_WIDTH * (int) strlen (menuText[0]))/2, 100);
   // Help text
-  for (int i = 1; i < 6; i++)
+  for (int i = 1; i < 7; i++)
     DSPDrawText (textFont, menuText[i], iX, 100 + FONT_HEIGHT + 2 + i * (FONT_HEIGHT + 2));// 2-px v-spacing
-  // Game text
-  for (int i = 0; i < 4; i++)
-    DSPDrawText (textFont, gameText[i], iX + (FRAME_WIDTH - FONT_WIDTH * (int) strlen (gameText[i]))/2 + i * (FRAME_WIDTH + FRAME_SPACE),
+  // Game text, the favorites of the page of the selected one
+  int iFirst = oItems.empty () ? 0 : index / MENU_TILES * MENU_TILES;
+  for (int i = 0; i < MENU_TILES && iFirst + i < (int) oItems.size (); i++)
+  {
+    std::string sName = oItems [iFirst + i].sName.substr (0, FRAME_WIDTH / FONT_WIDTH);
+    DSPDrawText (textFont, sName, iX + (FRAME_WIDTH - FONT_WIDTH * (int) sName.size ())/2 + i * (FRAME_WIDTH + FRAME_SPACE),
                  310 + FRAME_WIDTH + 15);// 15px text spacing
+  }
+  if (oItems.empty ())
+  {
+    DSPDrawText (textFont, "Zadne oblibene hry.", iX + (MENU_WIDTH - FONT_WIDTH * 19)/2, 400);
+    DSPDrawText (textFont, "Sipka nahoru [ E ] otevre seznam her,", iX + (MENU_WIDTH - FONT_WIDTH * 36)/2, 450);
+    DSPDrawText (textFont, "podrz [ Enter ] na hre: Pridat do oblibenych.", iX + (MENU_WIDTH - FONT_WIDTH * 45)/2, 480);
+  }
+  else if ((int) oItems.size () > MENU_TILES)
+  {
+    std::string sPage = "Strana " + std::to_string (index / MENU_TILES + 1) + "/" + std::to_string ((oItems.size () + MENU_TILES - 1) / MENU_TILES);
+    DSPDrawText (textFont, sPage, iX + MENU_WIDTH - FONT_WIDTH * (int) sPage.size (), 590);
+  }
 }
 
 
-void DSPRenderImage (int screen_width, int screen_height)
+void DSPRenderImage (int screen_width, int screen_height, int index, const std::vector <tMenuItem> &oItems)
 {
-  SDL_Rect imageRectangle;
-
-  for (int i = 0; i < 4; i++) {
-    if (!apLogoCache [i])
-    {
-      SDL_Surface *imageSurface = SDL_LoadBMP (gameLogo[i]);
-      if (!imageSurface)
-        continue;
-      apLogoCache [i] = SDL_CreateTextureFromSurface (mRenderer, imageSurface);
-      SDL_FreeSurface (imageSurface);
-    }
-    if (!apLogoCache [i])
-      continue;
-    imageRectangle.w = IMAGE_WIDTH;
-    imageRectangle.h = imageRectangle.w;
+  int iFirst = oItems.empty () ? 0 : index / MENU_TILES * MENU_TILES;
+  for (int i = 0; i < MENU_TILES && iFirst + i < (int) oItems.size (); i++) {
+    SDL_Texture *pTexture = oItems [iFirst + i].sImage.empty () ? NULL : DSPPictureTexture (oItems [iFirst + i].sImage);
+    SDL_Rect imageRectangle;
     imageRectangle.x = (screen_width - MENU_WIDTH)/2 + 13 + i * (IMAGE_WIDTH + 26 + FRAME_SPACE);// 13-px spacing
     imageRectangle.y = 320 + 13;
-
-    SDL_RenderCopy (mRenderer, apLogoCache [i], NULL, &imageRectangle);
+    if (pTexture)
+    {
+      // The picture is fitted into the square of the tile, the shape is kept.
+      int iW = 0, iH = 0;
+      SDL_QueryTexture (pTexture, NULL, NULL, &iW, &iH);
+      imageRectangle.w = iW >= iH ? IMAGE_WIDTH : IMAGE_WIDTH * iW / iH;
+      imageRectangle.h = iW >= iH ? IMAGE_WIDTH * iH / iW : IMAGE_WIDTH;
+      imageRectangle.x += (IMAGE_WIDTH - imageRectangle.w) / 2;
+      imageRectangle.y += (IMAGE_WIDTH - imageRectangle.h) / 2;
+      SDL_RenderCopy (mRenderer, pTexture, NULL, &imageRectangle);
+    }
+    else
+    {
+      // No picture: an empty frame with the name of the game in the middle (in lines that fit the frame).
+      SDL_SetRenderDrawColor (mRenderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+      imageRectangle.w = imageRectangle.h = IMAGE_WIDTH;
+      SDL_RenderDrawRect (mRenderer, &imageRectangle);
+      TTF_Font *pFont = DSPMenuFont ();
+      const std::string &sName = oItems [iFirst + i].sName;
+      int iChars = IMAGE_WIDTH / FONT_WIDTH;
+      int iLines = (int) ((sName.size () + iChars - 1) / iChars);
+      for (int iLine = 0 ; pFont && iLine < iLines ; iLine ++)
+      {
+        std::string sPart = sName.substr (iLine * iChars, iChars);
+        DSPDrawText (pFont, sPart, imageRectangle.x + (IMAGE_WIDTH - FONT_WIDTH * (int) sPart.size ()) / 2,
+                     imageRectangle.y + (IMAGE_WIDTH - iLines * (FONT_HEIGHT + 4)) / 2 + iLine * (FONT_HEIGHT + 4));
+      }
+    }
   }
 }
 
@@ -780,10 +932,92 @@ void DSPRenderLogo (int screen_width, int screen_height)
 }
 
 
+/// Popup menu (Spusti, Pridat do oblibenych...) over the menu or the list, drawn before the frame is presented.
+static void DSPDrawPopup (int screen_width, int screen_height)
+{
+  if (oPopupItems.empty ())
+    return;
+  TTF_Font *pFont = DSPMenuFont ();
+  if (!pFont)
+    return;
+  int iChars = (int) sPopupTitle.size ();
+  for (size_t i = 0 ; i < oPopupItems.size () ; i ++)
+    iChars = std::max (iChars, (int) oPopupItems [i].size () + 2);
+  int iRow = FONT_HEIGHT + 12;
+  SDL_Rect sBox = {(screen_width - FONT_WIDTH * iChars) / 2 - 24, (screen_height - iRow * ((int) oPopupItems.size () + 1)) / 2 - 20,
+                   FONT_WIDTH * iChars + 48, iRow * ((int) oPopupItems.size () + 1) + 40};
+  SDL_SetRenderDrawColor (mRenderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+  SDL_RenderFillRect (mRenderer, &sBox);
+  SDL_SetRenderDrawColor (mRenderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+  SDL_RenderDrawRect (mRenderer, &sBox);
+  SDL_Rect sInner = {sBox.x + 1, sBox.y + 1, sBox.w - 2, sBox.h - 2};
+  SDL_RenderDrawRect (mRenderer, &sInner);
+  DSPDrawText (pFont, sPopupTitle, sBox.x + (sBox.w - FONT_WIDTH * (int) sPopupTitle.size ()) / 2, sBox.y + 20);
+  for (int i = 0 ; i < (int) oPopupItems.size () ; i ++)
+  {
+    int iY = sBox.y + 20 + iRow * (i + 1);
+    if (i == iPopupSelected)
+    {
+      SDL_Rect sFrame = {sBox.x + 12, iY - 6, sBox.w - 24, iRow};
+      SDL_RenderDrawRect (mRenderer, &sFrame);
+      DSPDrawText (pFont, ">", sBox.x + 20, iY);
+    }
+    DSPDrawText (pFont, oPopupItems [i], sBox.x + 20 + 2 * FONT_WIDTH, iY);
+  }
+}
+
+
+/// Saves the menu or the list as it is on the screen as a BMP (the test script PMD_MENUSCRIPT).
+void DSPSaveMenuScreenshot (const char *pPath)
+{
+  if (!mRenderer)
+    return;
+  int iWidth, iHeight;
+  SDL_CheckZero (SDL_GetRendererOutputSize (mRenderer, &iWidth, &iHeight));
+  SDL_Surface *pSurface;
+  SDL_CheckNotNull (pSurface = SDL_CreateRGBSurfaceWithFormat (0, iWidth, iHeight, 32, SDL_PIXELFORMAT_ARGB8888));
+  SDL_CheckZero (SDL_RenderReadPixels (mRenderer, NULL, SDL_PIXELFORMAT_ARGB8888, pSurface->pixels, pSurface->pitch));
+  SDL_CheckZero (SDL_SaveBMP (pSurface, pPath));
+  SDL_FreeSurface (pSurface);
+}
+
+
+void DSPSetPopup (const std::string &sTitle, const std::vector <std::string> &oItems, int iSelected)
+{
+  sPopupTitle = sTitle;
+  oPopupItems = oItems;
+  iPopupSelected = iSelected;
+}
+
+
+void DSPClearPopup ()
+{
+  oPopupItems.clear ();
+}
+
+
+/// Icon of a favorite game: a star (outline of five points), iSize pixels high.
+static void DSPDrawIconStar (int iX, int iY, int iSize)
+{
+  const double fPi = 3.14159265358979;
+  int iCx = iX + iSize / 2, iCy = iY + iSize / 2 + 1;
+  double fOuter = iSize / 2.0, fInner = fOuter * 0.42;
+  SDL_Point aPoints [11];
+  for (int i = 0 ; i < 10 ; i ++)
+  {
+    double fAngle = -fPi / 2 + i * fPi / 5, fRadius = i % 2 ? fInner : fOuter;
+    aPoints [i].x = iCx + (int) (fRadius * cos (fAngle) + 0.5);
+    aPoints [i].y = iCy + (int) (fRadius * sin (fAngle) + 0.5);
+  }
+  aPoints [10] = aPoints [0];
+  SDL_RenderDrawLines (mRenderer, aPoints, 11);
+}
+
+
 /// Icon of a saved state, see below.
 static void DSPDrawIconState (int iX, int iY, int iSize);
 
-void DSPRenderMenu (int screen_width, int screen_height, int index, const bool *abState)
+void DSPRenderMenu (int screen_width, int screen_height, int index, const std::vector <tMenuItem> &oItems)
 {
   SDL_Rect frameRectangle;
   SDL_Rect frameRectangleInner;
@@ -793,7 +1027,10 @@ void DSPRenderMenu (int screen_width, int screen_height, int index, const bool *
   SDL_SetRenderDrawColor (mRenderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
   SDL_RenderClear (mRenderer);
 
-  for (int i = 0; i < 4; i++) {
+  int iFirst = oItems.empty () ? 0 : index / MENU_TILES * MENU_TILES;
+  for (int i = 0; i < MENU_TILES; i++) {
+    if (iFirst + i >= (int) oItems.size ())
+      break;
     frameRectangle.w = 200;
     frameRectangle.h = 260;
     frameRectangle.x = (screen_width - MENU_WIDTH)/2 + i *(FRAME_WIDTH + FRAME_SPACE);
@@ -804,21 +1041,22 @@ void DSPRenderMenu (int screen_width, int screen_height, int index, const bool *
     frameRectangleInner.x = (screen_width - MENU_WIDTH)/2 + 1 + i *(FRAME_WIDTH + FRAME_SPACE);
     frameRectangleInner.y = 320 + 1;
 
-    if (i == index) { SDL_SetRenderDrawColor (mRenderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+    if (iFirst + i == index) { SDL_SetRenderDrawColor (mRenderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
     } else { SDL_SetRenderDrawColor (mRenderer, 0, 0, 0, SDL_ALPHA_OPAQUE); }
 
     SDL_RenderDrawRect (mRenderer, &frameRectangle);
     SDL_RenderDrawRect (mRenderer, &frameRectangleInner);
     // A saved state of the game: the disk icon in the corner of the frame.
-    if (abState && abState [i])
+    if (oItems [iFirst + i].bState)
     {
       SDL_SetRenderDrawColor (mRenderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
       DSPDrawIconState (frameRectangle.x + FRAME_WIDTH - ICON_SLOT - 4, frameRectangle.y + frameRectangle.h + 8, FONT_HEIGHT);
     }
   }
-  DSPRenderText (screen_width, screen_height);
-  DSPRenderImage (screen_width, screen_height);
- 
+  DSPRenderText (screen_width, screen_height, index, oItems);
+  DSPRenderImage (screen_width, screen_height, index, oItems);
+  DSPDrawPopup (screen_width, screen_height);
+
   SDL_RenderPresent (mRenderer);
   DSPMenuStat (iPerfBegin);
 }
@@ -912,7 +1150,7 @@ static void DSPDrawWrapped (TTF_Font *pFont, const std::string &sText, int iX, i
   }
 }
 
-void DSPRenderGameList (int screen_width, int screen_height, int index, const std::string &sTitle, const std::vector <std::string> &oNames, const std::vector <std::string> &oNotes, const std::vector <std::string> &oInputs, const std::string &sHelp)
+void DSPRenderGameList (int screen_width, int screen_height, int index, const std::string &sTitle, const std::vector <std::string> &oNames, const std::vector <std::string> &oNotes, const std::vector <std::string> &oInputs, const std::string &sHelp, const std::string &sImage)
 {
   const int iRowHeight = FONT_HEIGHT + 8;
   const int iTop = 140;
@@ -959,6 +1197,9 @@ void DSPRenderGameList (int screen_width, int screen_height, int index, const st
     // A family (the versions of one game): the triangle after the name says that it opens.
     if (oInputs [i].find ('F') != std::string::npos)
       DSPDrawIconMore (iX + 3 * ICON_SLOT + FONT_WIDTH * (int) oNames [i].size () + 10, iY, FONT_HEIGHT);
+    // A favorite game: the star after the name.
+    if (oInputs [i].find ('V') != std::string::npos)
+      DSPDrawIconStar (iX + 3 * ICON_SLOT + FONT_WIDTH * (int) oNames [i].size () + 10, iY, FONT_HEIGHT);
     DSPDrawText (pFont, oNotes [i], iX + 3 * ICON_SLOT + FONT_WIDTH * 14, iY);
   }
   DSPDrawIconGamepad (iX, screen_height - 30, FONT_HEIGHT);
@@ -970,7 +1211,21 @@ void DSPRenderGameList (int screen_width, int screen_height, int index, const st
   // The texts under the list are broken into lines that fit the screen.
   int iChars = std::max (20, (screen_width - iX - 24) / FONT_WIDTH);
   DSPDrawWrapped (pFont, sHelp.empty () ? "Ovladani: neznamo (zkus sipky, mezernik, Enter)" : "Ovladani: " + sHelp, iX, screen_height - 170, iChars, 2, 28);
-  DSPDrawWrapped (pFont, "Sipky nebo [ E ] [ Y ]: vyber  <- -> strana  [ Enter ]: spust  [ Esc ]: zpet", iX, screen_height - 100, iChars, 2, 28);
+  DSPDrawWrapped (pFont, "Sipky nebo [ E ] [ Y ]: vyber  <- -> strana  [ Enter ]: spust  [ Esc ]: zpet  [ Enter ] drzet: menu", iX, screen_height - 100, iChars, 2, 28);
+  // The picture of the selected game (the one of the main menu) in the bottom left corner, left of the texts under the list. Smaller
+  // when the margin is narrow, none when it is narrower than half of the picture.
+  SDL_Texture *pPicture = sImage.empty () ? NULL : DSPPictureTexture (sImage);
+  int iSide = std::min (IMAGE_WIDTH, iX - 12 - 2 * 16);
+  if (pPicture && iSide >= IMAGE_WIDTH / 2)
+  {
+    int iW = 0, iH = 0;
+    SDL_QueryTexture (pPicture, NULL, NULL, &iW, &iH);
+    SDL_Rect sPicture = {0, 0, iW >= iH ? iSide : iSide * iW / iH, iW >= iH ? iSide * iH / iW : iSide};
+    sPicture.x = (iX - 12 - sPicture.w) / 2;
+    sPicture.y = screen_height - 20 - iSide + (iSide - sPicture.h) / 2;
+    SDL_RenderCopy (mRenderer, pPicture, NULL, &sPicture);
+  }
+  DSPDrawPopup (screen_width, screen_height);
   SDL_RenderPresent (mRenderer);
   DSPMenuStat (iPerfBegin);
 }

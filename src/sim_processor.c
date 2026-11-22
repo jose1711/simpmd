@@ -1327,7 +1327,16 @@ void CPUAllRamRestore (byte iFlags, const byte *pHidden)
 #define PMD_BEEP_LOOP           0x88B5
 #define PMD_BEEP_CALLER         0x88B1
 #define PMD_BEEP_EXTRA          72
-static word iBeepLoop = getenv ("PMD_BEEPSLOW") && atoi (getenv ("PMD_BEEPSLOW")) ? PMD_BEEP_LOOP : 0;
+static word iBeepLoop = 0;
+
+/// The slow beep loop for the started game ("BEEPSLOW" in its note), PMD_BEEPSLOW=0/1 overrides it.
+void CPUSetBeepSlow (bool bSlow)
+{
+  const char *pEnv = getenv ("PMD_BEEPSLOW");
+  if (pEnv && *pEnv)
+    bSlow = atoi (pEnv) != 0;
+  iBeepLoop = bSlow ? PMD_BEEP_LOOP : 0;
+}
 
 /** ROM module (BASIC-G, Pascal, ...): a 32 KB ROM read through an 8255 at the ports 0x88-0x8B (the address
  *  decoding is partial, 0x8C mask): the address is written to port B (low) and C (high), a read of port A returns
@@ -1847,9 +1856,11 @@ bool CPUPause ()
   for (int i = 0 ; i < 2000 && !bPaused ; i ++)
     usleep (1000);
   std::atomic_thread_fence (std::memory_order_seq_cst);
-  if (!bPaused)
+  // One look at the flag: the answer and the withdrawn request must agree (the thread may park itself just now).
+  bool bStopped = bPaused;
+  if (!bStopped)
     bPauseRequest = false;
-  return (bPaused);
+  return (bStopped);
 }
 
 

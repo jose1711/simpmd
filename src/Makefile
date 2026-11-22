@@ -16,7 +16,7 @@ CC_OPTS += -D PMD_STATEHOME=\"$(PMD_STATEHOME)\"
 endif
 LD = g++
 LD_OPTS =
-LD_LIBS = -lSDL2 -lSDL2_ttf -lpthread -lrt
+LD_LIBS = -lSDL2 -lSDL2_ttf -lz -lpthread -lrt
 
 ifeq ($(PMD_BUILD), DEBUG)
 CC_OPTS += -O0 -g

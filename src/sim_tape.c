@@ -305,10 +305,25 @@ static long long iSignalBitEnd = 0, iSignalNextToggle = 0, iSignalLast = 0;
 static int iSignalIndex = 0, iSignalLevel = 1;
 static long long iSignalHalf1 = 0, iSignalHalf0 = 0;
 
+/// The clock of the processor is 32 bits wide and wraps after about 17 minutes: the signal counts in 64 bits, the
+/// differences of the 32 bit clock are added up.
+static long long iSignalClock = 0;
+static int iSignalClockPrev = 0;
+
+static long long TAPSignalClock ()
+{
+  int iNow = iProcessorClock;
+  iSignalClock += (int) ((unsigned int) iNow - (unsigned int) iSignalClockPrev);
+  iSignalClockPrev = iNow;
+  return (iSignalClock);
+}
+
 void TAPSetSignal (bool bOn)
 {
   bSignalOn = bOn;
   bSignalRun = false;
+  iSignalClockPrev = iProcessorClock;
+  iSignalClock = 0;
   const char *pH1 = getenv ("PMD_DSR_H1");
   const char *pH0 = getenv ("PMD_DSR_H0");
   iSignalHalf1 = pH1 ? atoi (pH1) : PMD_CLOCK / iArgTapeRate / 2;
@@ -326,9 +341,10 @@ static int TAPSignalBit (int iByte, int iIndex)
 /// Level of the signal now.
 static int TAPSignalLevel ()
 {
-  long long iNow = iProcessorClock;
+  long long iNow = TAPSignalClock ();
   const long long iBit = PMD_CLOCK / iArgTapeRate;
-  if (!bSignalRun || iNow - iSignalLast > 40000)
+  // Also when the clock went back (a loaded state).
+  if (!bSignalRun || iNow - iSignalLast > 40000 || iNow < iSignalLast)
   {
     // The program has not looked for a while (the tape stands): the signal starts again from the next byte.
     bSignalRun = true;
@@ -386,6 +402,14 @@ byte TAPReadData ()
 }
 
 
+/** Milliseconds since the program last read a byte of the tape input, -1 if it has not read any yet (web state).
+ */
+int TAPMsSinceRead ()
+{
+  return (iLastInputTime == 0 ? -1 : (int) (SDL_GetTicks () + 1 - iLastInputTime));
+}
+
+
 /** Write to tape data register.
  *
  *  @arg iData The written value.
@@ -398,10 +422,7 @@ void TAPWriteData (byte bData)
     if (!sSavePath.empty () && !oTapeOutput.is_open ())
     {
       // The first byte of a save: a new tape replaces the old one.
-      size_t iSlash = sSavePath.rfind ('/');
-      if (iSlash != std::string::npos)
-        for (size_t iPos = sSavePath.find ('/', 1); iPos != std::string::npos && iPos <= iSlash; iPos = sSavePath.find ('/', iPos + 1))
-          mkdir (sSavePath.substr (0, iPos).c_str (), 0755);  // all levels, like mkdir -p
+      SIMMakeDirs (sSavePath);
       oTapeOutput.clear ();
       oTapeOutput.open (sSavePath.c_str (), std::ios::binary | std::ios::trunc);
       // The saved tape being read is the old one: the next Load opens the new file from its start.

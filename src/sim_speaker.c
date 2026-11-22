@@ -50,6 +50,8 @@ static int iArgLead = 50;
 
 /// Singleton audio specification.
 static SDL_AudioSpec sAudioSpec;
+/// The audio device is open, false when there is none (the emulator then runs without sound).
+static bool bAudioOpen = false;
 
 /// Singleton cyclic audio buffer.
 static byte *pAudioBuffer;
@@ -314,8 +316,9 @@ void SNDGenerate (byte iSpeaker)
     }
   }
 
-  // The partial sample stays in the accumulator, so all the elapsed time is consumed.
-  iLastClock = iProcessorClock;
+  // The partial sample stays in the accumulator, so all the elapsed time is consumed. Not the clock of now: the
+  // processor runs on while the audio thread is here and those clocks would never be turned into samples.
+  iLastClock += iDeltaInClocks;
 }
 
 
@@ -332,6 +335,12 @@ void SNDGenerate (byte iSpeaker)
  */
 void SNDWriteSpeaker (byte iData)
 {
+  // Without an audio device nobody takes the samples.
+  if (!bAudioOpen)
+  {
+    iLastSpeaker = iData;
+    return;
+  }
   CheckZero (pthread_mutex_lock (&sAudioBufferLock));
   // Generate whatever sound was heard until now.
   SNDGenerate (iLastSpeaker);
@@ -450,8 +459,13 @@ void SNDInitialize ()
   sAudioSpec.userdata = NULL;
   sAudioSpec.callback = SNDFillBufferCallback;
 
-  // Open the audio device ...
-  SDL_CheckZero (SDL_OpenAudio (&sAudioSpec, NULL));
+  // Open the audio device ... the emulator runs without sound when there is none (a display without speakers).
+  bAudioOpen = SDL_OpenAudio (&sAudioSpec, NULL) == 0;
+  if (!bAudioOpen)
+  {
+    fprintf (stderr, "No sound: %s\n", SDL_GetError ());
+    return;
+  }
 
   // Check if audio parameters were granted ...
   assert (sAudioSpec.freq == iArgSamplingRate);
@@ -470,7 +484,9 @@ void SNDInitialize ()
 void SNDShutdown ()
 {
   // Close the audio device ...
-  SDL_CloseAudio ();
+  if (bAudioOpen)
+    SDL_CloseAudio ();
+  bAudioOpen = false;
 
   if (iStatLevel > 0)
   {

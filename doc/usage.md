@@ -40,6 +40,16 @@ Notes on `PMD_KEYS`:
 - BOULDER: the second `H` may be lost, `PMD_KEY_MS=400` makes it pass.
 - `PMD_GAME` types the load command from `games.lst` by itself, `PMD_KEYS` replaces it.
 
+`PMD_MENUSCRIPT` drives the menus (the main menu, the list, the popup menu of the favorites) with no keyboard and saves
+the screen as BMP; a step is every 400 ms (the first after 1.5 s). The steps are separated by spaces: an SDL key name
+(`Right`, `Down`, `Return`, `Escape`) is a tap, `<key>:hold` holds the key `PMD_OK_MS` + 0.3 s, `shot=<file>` saves the
+menu, `quit` ends the program. Example (hold [Enter] on the second favorite, choose Odebrat z oblibenych, save the screen),
+without a monitor (`SDL_VIDEODRIVER=dummy SDL_RENDER_DRIVER=software`) with a scratch `PMD_FAVORITES` file:
+
+```sh
+PMD_FAVORITES=/tmp/fav.lst PMD_MENUSCRIPT='Right Return:hold Down Return shot=/tmp/menu.bmp quit' bin/simpmd
+```
+
 ## Saved state
 
 The state of the running game can be saved and loaded again:
@@ -124,6 +134,8 @@ The characters of `PMD_KEYS`:
 | Variable | Meaning |
 |---|---|
 | `PMD_ESC_MS=<ms>` | Hold time of [Esc] (back from a game or the list, quit in the main menu), default 800, 0 = at once. |
+| `PMD_OK_MS=<ms>` | Hold time of [Enter] in the menus that opens the popup menu of the game (Spusti, favorites), default 800, 0 = no popup menu and [Enter] acts at once, see [games.md](games.md#favorites). |
+| `PMD_FAVORITES=<file>` | File of the favorite games of the main menu, default `favorites.lst` in `PMD_STATEDIR`. |
 | `PMD_PAD=<input>=<key>,...` | Gamepad keys, see [remote.md](remote.md#gamepad). |
 | `PMD_WEB=<port>` | Remote control from a browser, see [remote.md](remote.md#web-remote-control). `PMD_WEB_TOKEN=<secret>` protects it. |
 
@@ -131,7 +143,7 @@ The characters of `PMD_KEYS`:
 
 | Variable | Meaning |
 |---|---|
-| `PMD_BEEPSLOW=1` | The monitor beep delay of the games (note length, e.g. INVADERS hits) as in the PMD 85-2/2A ROM. |
+| `PMD_BEEPSLOW=0/1` | The monitor beep delay of the games (note length, e.g. INVADERS hits) as in the PMD 85-2/2A ROM, for every game; without it only the games with `BEEPSLOW` in the note. |
 | `PMD_SNDSTATS=1` | Print sound underrun statistics on exit; `2` also logs each underrun/drop with its time to stderr. |
 | `PMD_SNDLEVEL=1` | Log every 10 s: the peak output level, the underruns, the changes of the speaker register and the calls of the sound generator. Tells a silent game (`peak 0`, no changes) from a stopped emulation (no calls) and from a silent TV (`peak` > 0). |
 | `PMD_SNDLEAD=<ms>` | Sound lead kept in the buffer, default 50; the buffer is refilled after an underrun. |
